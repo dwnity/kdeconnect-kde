@@ -1,4 +1,12 @@
-include:
-  - https://invent.kde.org/sysadmin/ci-tooling/raw/master/invent/ci-before.yml
-  - https://invent.kde.org/sysadmin/ci-tooling/raw/master/invent/ci-extragear-linux.yml
-  - https://invent.kde.org/sysadmin/ci-tooling/raw/master/invent/ci-extragear-freebsd.yml
+stages:
+    - build
+
+kdeconnect-kde_xenial_click:
+    stage: build  
+    image: clickable/ci-16.04-armhf
+    script:
+        - clickable clean build click-build 
+    artifacts:
+        paths:
+            - build/*.click
+        expire_in: 1 week
