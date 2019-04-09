@@ -15,19 +15,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef REMOTECOMMANDSPLUGIN_H
 #define REMOTECOMMANDSPLUGIN_H
 
-#include <QObject>
+class QObject;
 
 #include <core/kdeconnectplugin.h>
-#include <QFile>
-#include <QFileSystemWatcher>
-#include <QMap>
-#include <QPair>
 #include <QString>
 
 class Q_DECL_EXPORT RemoteCommandsPlugin

@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.2
@@ -107,7 +107,8 @@ Kirigami.ApplicationWindow
                 sourceModel: DevicesModel { displayFilter: DevicesModel.Paired | DevicesModel.Reachable }
             }
             delegate: Kirigami.Action {
-                iconName: model.iconName
+                icon.name: model.iconName
+                icon.color: "transparent"
                 text: display + "\n" + toolTip
                 visible: status & DevicesModel.Reachable
                 checked: pageStack.currentItem && pageStack.currentItem.currentDevice == device

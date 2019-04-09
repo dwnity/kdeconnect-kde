@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <QSocketNotifier>
@@ -103,9 +103,14 @@ class TestSendFile : public QObject
             kcc->addTrustedDevice(deviceId, deviceName, deviceType);
             kcc->setDeviceProperty(deviceId, QStringLiteral("certificate"), QString::fromLatin1(kcc->certificate().toPem())); // Using same certificate from kcc, instead of generating
 
+            //We need the device to be loaded on the daemon, otherwise CompositeUploadJob will get a null device
+            Device* device = new Device(this, deviceId);
+            m_daemon->addDevice(device);
+
             QSharedPointer<QFile> f(new QFile(aFile));
             NetworkPacket np(PACKET_TYPE_SHARE_REQUEST);
-            np.setPayload(f, aFile.size());
+            np.setPayload(f, f->size());
+
             CompositeUploadJob* job = new CompositeUploadJob(deviceId, false);
             UploadJob* uj = new UploadJob(np);
             job->addSubjob(uj);
@@ -115,19 +120,21 @@ class TestSendFile : public QObject
 
             f->open(QIODevice::ReadWrite);
 
-            FileTransferJob* ft = new FileTransferJob(f, aFile.size(), QUrl::fromLocalFile(destFile));
+            FileTransferJob* ft = np.createPayloadTransferJob(QUrl::fromLocalFile(destFile));
 
             QSignalSpy spyTransfer(ft, &KJob::result);
 
             ft->start();
 
-            QVERIFY(spyTransfer.count() || spyTransfer.wait(1000000000));
+            QVERIFY(spyTransfer.count() || spyTransfer.wait());
 
-            if (ft->error()) qWarning() << "fterror" << ft->errorString();
+            if (ft->error()) {
+                qWarning() << "fterror" << ft->errorString();
+            }
 
             QCOMPARE(ft->error(), 0);
-            // HACK | FIXME: Why does this break the test?
-            //QCOMPARE(spyUpload.count(), 1);
+
+            QCOMPARE(spyUpload.count(), 1);
 
             QFile resultFile(destFile), originFile(aFile);
             QVERIFY(resultFile.open(QIODevice::ReadOnly));

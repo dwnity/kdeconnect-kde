@@ -17,23 +17,58 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.5
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
 import org.kde.people 1.0
-import org.kde.kirigami 2.2 as Kirigami
+import org.kde.kirigami 2.4 as Kirigami
 import org.kde.kdeconnect 1.0
 import org.kde.kdeconnect.sms 1.0
 
 Kirigami.ScrollablePage
 {
     id: page
+    ToolTip {
+        id: noDevicesWarning
+        visible: !devicesCombo.enabled
+        timeout: -1
+        text: "⚠️ " + i18n("No devices available") + " ⚠️"
+
+        MouseArea {
+            // Detect mouseover and show another tooltip with more information
+            anchors.fill: parent
+            hoverEnabled: true
+
+            ToolTip.visible: containsMouse
+            ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
+            // TODO: Wrap text if line is too long for the screen
+            ToolTip.text: i18n("No new messages can be sent or received, but you can browse cached content")
+        }
+    }
+
+    property string initialMessage
+
+    header: Kirigami.InlineMessage {
+        Layout.fillWidth: true
+        visible: page.initialMessage.length > 0
+        text: i18n("Choose recipient")
+
+        actions: [
+          Kirigami.Action {
+              iconName: "dialog-cancel"
+              text: "Cancel"
+              onTriggered: initialMessage = ""
+            }
+        ]
+    }
+
     footer: ComboBox {
         id: devicesCombo
         enabled: count > 0
+        displayText: !enabled ? i18n("No devices available") : undefined
         model: DevicesSortProxyModel {
             id: devicesModel
             //TODO: make it possible to filter if they can do sms
@@ -43,12 +78,6 @@ Kirigami.ScrollablePage
             }
         }
         textRole: "display"
-    }
-    
-    Label {
-        text: i18n("No devices available")
-        anchors.centerIn: parent
-        visible: !devicesCombo.enabled
     }
 
     readonly property bool deviceConnected: devicesCombo.enabled
@@ -120,10 +149,21 @@ Kirigami.ScrollablePage
                                                        personUri: model.personUri,
                                                        phoneNumber: address,
                                                        conversationId: model.conversationId,
-                })
+                                                       initialMessage: page.initialMessage,
+                                                       device: device})
+                initialMessage = ""
             }
-            onClicked: { startChat(); }
+            onClicked: {
+                startChat();
+                view.currentIndex = index
+            }
+            // Keep the currently-open chat highlighted even if this element is not focused
+            highlighted: chatView.conversationId == model.conversationId
         }
 
+        Component.onCompleted: {
+            currentIndex = -1
+            focus = true
+        }
     }
 }

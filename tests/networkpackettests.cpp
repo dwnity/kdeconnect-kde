@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "networkpackettests.h"
@@ -23,7 +23,6 @@
 #include "core/networkpacket.h"
 
 #include <QtTest>
-#include <QtCrypto>
 
 QTEST_GUILESS_MAIN(NetworkPacketTests);
 

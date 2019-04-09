@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <QSocketNotifier>
@@ -134,6 +134,10 @@ public:
     void setApplications(const QHash<QString, NotifyingApplication>& value)
     {
         m_applications = value;
+    }
+
+    QSharedPointer<QIODevice> iconForIconName(const QString& iconName) const {
+        return NotificationsListener::iconForIconName(iconName);
     }
 
 protected:
@@ -370,7 +374,7 @@ void TestNotificationListener::testNotify()
         QCOMPARE(retId, replacesId);
         QCOMPARE(++proxiedNotifications, d->getSentPackets());
         QVERIFY(d->getLastPacket()->hasPayload());
-        QCOMPARE(d->getLastPacket()->payloadSize(), fi.size());
+        QCOMPARE(d->getLastPacket()->payloadSize(), listener->iconForIconName(fi.baseName())->size());
         // works also with absolute paths
         retId = listener->Notify(appName, replacesId, iconName, summary, body, {}, {{}}, 0);
         QCOMPARE(retId, replacesId);

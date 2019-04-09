@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef TESTDAEMON_H
@@ -31,6 +31,10 @@ public:
         : Daemon(parent, true)
         , m_nam(Q_NULLPTR)
     {
+    }
+
+    void addDevice(Device* device) {
+        Daemon::addDevice(device);
     }
 
     void reportError(const QString & title, const QString & description) override
@@ -50,7 +54,7 @@ public:
         return m_nam;
     }
 
-        Q_SCRIPTABLE virtual void sendSimpleNotification(const QString &eventId, const QString &title, const QString &text, const QString &iconName) override
+    Q_SCRIPTABLE virtual void sendSimpleNotification(const QString &eventId, const QString &title, const QString &text, const QString &iconName) override
     {
         qDebug() << eventId << title << text << iconName;
     }

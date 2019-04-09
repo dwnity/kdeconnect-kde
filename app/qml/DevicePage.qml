@@ -15,14 +15,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.2
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
-import org.kde.kirigami 2.0 as Kirigami
+import org.kde.kirigami 2.7 as Kirigami
 import org.kde.kdeconnect 1.0
 
 Kirigami.Page
@@ -40,8 +40,6 @@ Kirigami.Page
     Loader {
         id: deviceLoader
         anchors.fill: parent
-        Layout.fillHeight: true
-        Layout.fillWidth: true
 
         sourceComponent: {
             if (deviceView.currentDevice.hasPairingRequests) {
@@ -61,13 +59,15 @@ Kirigami.Page
 
         Component {
             id: trustedDevice
-            ColumnLayout {
+            ListView {
                 property list<QtObject> actions: [
                     Kirigami.Action {
+                        iconName:"network-disconnect"
                         onTriggered: deviceView.currentDevice.unpair()
                         text: i18n("Unpair")
                     },
                     Kirigami.Action {
+                        iconName:"hands-free"
                         text: i18n("Send Ping")
                         onTriggered: {
                             deviceView.currentDevice.pluginCall("ping", "sendPing");
@@ -76,67 +76,75 @@ Kirigami.Page
                 ]
 
                 id: trustedView
-                spacing: 0
-                Layout.fillHeight: true
                 Layout.fillWidth: true
 
-                PluginItem {
-                    label: i18n("Multimedia control")
-                    interfaceFactory: MprisDbusInterfaceFactory
-                    component: "qrc:/qml/mpris.qml"
-                    pluginName: "mprisremote"
-                }
-                PluginItem {
-                    label: i18n("Remote input")
-                    interfaceFactory: RemoteControlDbusInterfaceFactory
-                    component: "qrc:/qml/mousepad.qml"
-                    pluginName: "remotecontrol"
-                }
-                PluginItem {
-                    label: i18n("Presentation Remote")
-                    interfaceFactory: RemoteKeyboardDbusInterfaceFactory
-                    component: "qrc:/qml/presentationRemote.qml"
-                    pluginName: "remotecontrol"
-                }
-                PluginItem {
-                    readonly property var lockIface: LockDeviceDbusInterfaceFactory.create(deviceView.currentDevice.id())
-                    pluginName: "lockdevice"
-                    label: lockIface.isLocked ? i18n("Unlock") : i18n("Lock")
-                    onClicked: {
-                        lockIface.isLocked = !lockIface.isLocked;
-                    }
-                }
-                PluginItem {
-                    readonly property var findmyphoneIface: FindMyPhoneDbusInterfaceFactory.create(deviceView.currentDevice.id())
-                    pluginName: "findmyphone"
-                    label: i18n("Find Device")
-                    onClicked: {
-                        findmyphoneIface.ring()
-                    }
-                }
-                PluginItem {
-                    label: i18n("Run command")
-                    interfaceFactory: RemoteCommandsDbusInterfaceFactory
-                    component: "qrc:/qml/runcommand.qml"
-                    pluginName: "remotecommands"
-                }
-                PluginItem {
-                    readonly property var shareIface: ShareDbusInterfaceFactory.create(deviceView.currentDevice.id())
-                    pluginName: "share"
-                    label: i18n("Share File")
-                    onClicked: {
-                        fileDialog.open()
-                        shareIface.shareUrl(fileDialog.fileUrl)
-                    }
-                }
-                PluginItem {
-                    label: i18n("Volume control")
-                    interfaceFactory: RemoteSystemVolumeDbusInterfaceFactory
-                    component: "qrc:/qml/volume.qml"
-                    pluginName: "remotesystemvolume"
+                model: plugins
+                delegate: Kirigami.BasicListItem {
+                    label: name
+                    icon: iconName
+                    iconColor: "transparent"
+                    visible: loaded
+                    onClicked: onClick()
                 }
 
-                Item { Layout.fillHeight: true }
+                property list<QtObject> plugins : [
+
+                    PluginItem {
+                        name: i18n("Multimedia control")
+                        interfaceFactory: MprisDbusInterfaceFactory
+                        component: "qrc:/qml/mpris.qml"
+                        pluginName: "mprisremote"
+                    },
+                    PluginItem {
+                        name: i18n("Remote input")
+                        interfaceFactory: RemoteControlDbusInterfaceFactory
+                        component: "qrc:/qml/mousepad.qml"
+                        pluginName: "remotecontrol"
+                    },
+                    PluginItem {
+                        name: i18n("Presentation Remote")
+                        interfaceFactory: RemoteKeyboardDbusInterfaceFactory
+                        component: "qrc:/qml/presentationRemote.qml"
+                        pluginName: "remotecontrol"
+                    },
+                    PluginItem {
+                        readonly property var lockIface: LockDeviceDbusInterfaceFactory.create(deviceView.currentDevice.id())
+                        pluginName: "lockdevice"
+                        name: lockIface.isLocked ? i18n("Unlock") : i18n("Lock")
+                        onClick: function() {
+                            lockIface.isLocked = !lockIface.isLocked;
+                        }
+                    },
+                    PluginItem {
+                        readonly property var findmyphoneIface: FindMyPhoneDbusInterfaceFactory.create(deviceView.currentDevice.id())
+                        pluginName: "findmyphone"
+                        name: i18n("Find Device")
+                        onClick: function() {
+                            findmyphoneIface.ring()
+                        }
+                    },
+                    PluginItem {
+                        name: i18n("Run command")
+                        interfaceFactory: RemoteCommandsDbusInterfaceFactory
+                        component: "qrc:/qml/runcommand.qml"
+                        pluginName: "remotecommands"
+                    },
+                    PluginItem {
+                        readonly property var shareIface: ShareDbusInterfaceFactory.create(deviceView.currentDevice.id())
+                        pluginName: "share"
+                        name: i18n("Share File")
+                        onClick: function() {
+                            fileDialog.open()
+                            shareIface.shareUrl(fileDialog.fileUrl)
+                        }
+                    },
+                    PluginItem {
+                        name: i18n("Volume control")
+                        interfaceFactory: RemoteSystemVolumeDbusInterfaceFactory
+                        component: "qrc:/qml/volume.qml"
+                        pluginName: "remotesystemvolume"
+                    }
+                ]
             }
         }
         Component {
@@ -145,8 +153,8 @@ Kirigami.Page
                 readonly property var actions: []
                 Button {
                     anchors.centerIn: parent
-
                     text: i18n("Pair")
+                    icon.name:"network-connect"
                     onClicked: deviceView.currentDevice.requestPair()
                 }
             }
@@ -159,11 +167,13 @@ Kirigami.Page
                         anchors.centerIn: parent
                     Button {
                         text: i18n("Accept")
+                        icon.name:"dialog-ok"
                         onClicked: deviceView.currentDevice.acceptPairing()
                     }
 
                     Button {
                         text: i18n("Reject")
+                        icon.name:"dialog-cancel"                        
                         onClicked: deviceView.currentDevice.rejectPairing()
                     }
                 }

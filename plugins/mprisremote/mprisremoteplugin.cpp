@@ -15,16 +15,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "mprisremoteplugin.h"
 
-#include <KLocalizedString>
 #include <KPluginFactory>
 
 #include <QDebug>
-#include <QDBusConnection>
 #include <QLoggingCategory>
 
 #include <core/device.h>
@@ -50,7 +48,11 @@ bool MprisRemotePlugin::receivePacket(const NetworkPacket& np)
         return false;
 
     if (np.has(QStringLiteral("player"))) {
-        m_players[np.get<QString>(QStringLiteral("player"))]->parseNetworkPacket(np);
+        const QString player = np.get<QString>(QStringLiteral("player"));
+        if(!m_players.contains(player)) {
+             m_players[player] = new MprisRemotePlayer();
+        }
+        m_players[player]->parseNetworkPacket(np);
     }
 
     if (np.has(QStringLiteral("playerList"))) {

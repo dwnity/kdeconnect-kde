@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "filetransferjob.h"
@@ -128,7 +128,7 @@ void FileTransferJob::transferFinished()
 
         emitResult();
     } else {
-        qCDebug(KDECONNECT_CORE) << "Received incomplete file, deleting";
+        qCDebug(KDECONNECT_CORE) << "Received incomplete file ("<< m_written << "/" << m_size << "bytes ), deleting";
         
         if (m_destination.isLocalFile() && QFile::exists(m_destination.toLocalFile())) {
             QFile::remove(m_destination.toLocalFile());

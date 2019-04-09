@@ -15,24 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "kcm.h"
 
-#include <QLabel>
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
-#include <QStackedLayout>
-#include <QListView>
-#include <QDBusConnection>
-#include <QDBusInterface>
-
-#include <KServiceTypeTrader>
 #include <KPluginInfo>
 #include <KPluginMetaData>
-#include <KPluginFactory>
 #include <KAboutData>
 #include <KLocalizedString>
 #include <kcmutils_version.h>
@@ -78,7 +67,7 @@ KdeConnectKcm::KdeConnectKcm(QWidget* parent, const QVariantList& args)
 
     //Workaround: If we set this directly (or if we set it in the .ui file), the layout breaks
     kcmUi->noDeviceLinks->setWordWrap(false);
-    QTimer::singleShot(0, [this] { kcmUi->noDeviceLinks->setWordWrap(true); });
+    QTimer::singleShot(0, this, [this] { kcmUi->noDeviceLinks->setWordWrap(true); });
 
     setWhenAvailable(daemon->announcedName(), [this](const QString& announcedName) {
         kcmUi->rename_label->setText(announcedName);

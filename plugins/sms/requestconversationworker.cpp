@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "requestconversationworker.h"
@@ -75,7 +75,7 @@ size_t RequestConversationWorker::replyForConversation(const QList<ConversationM
     // Messages are sorted in ascending order of keys, meaning the front of the list has the oldest
     // messages (smallest timestamp number)
     // Therefore, return the end of the list first (most recent messages)
-    int i = 0;
+    size_t i = 0;
     for(auto it = conversation.crbegin() + start; it != conversation.crend(); ++it) {
         if (i >= howMany) {
             break;

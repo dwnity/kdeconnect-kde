@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "shareplugin.h"
@@ -33,6 +33,7 @@
 #include <KJobTrackerInterface>
 #include <KPluginFactory>
 #include <KIO/MkpathJob>
+#include <KMimeTypeTrader>
 
 #include "core/filetransferjob.h"
 
@@ -121,14 +122,19 @@ bool SharePlugin::receivePacket(const NetworkPacket& np)
         }
     } else if (np.has(QStringLiteral("text"))) {
         QString text = np.get<QString>(QStringLiteral("text"));
-        if (!QStandardPaths::findExecutable(QStringLiteral("kate")).isEmpty()) {
+
+        KService::Ptr service = KMimeTypeTrader::self()->preferredService(QStringLiteral("text/plain"));
+        const QString defaultApp = service ? service->desktopEntryName() : QString();
+
+        if (defaultApp == QLatin1String("org.kde.kate") || defaultApp == QLatin1String("org.kde.kwrite")) {
             QProcess* proc = new QProcess();
             connect(proc, SIGNAL(finished(int)), proc, SLOT(deleteLater()));
-            proc->start(QStringLiteral("kate"), QStringList(QStringLiteral("--stdin")));
+            proc->start(defaultApp.section('.', 2,2), QStringList(QStringLiteral("--stdin")));
             proc->write(text.toUtf8());
             proc->closeWriteChannel();
         } else {
             QTemporaryFile tmpFile;
+            tmpFile.setFileTemplate(QStringLiteral("kdeconnect-XXXXXX.txt"));
             tmpFile.setAutoRemove(false);
             tmpFile.open();
             tmpFile.write(text.toUtf8());
@@ -179,7 +185,7 @@ void SharePlugin::shareUrl(const QUrl& url)
 }
 
 void SharePlugin::shareUrls(const QStringList& urls) {
-    for(const QString url : urls) {
+    for(const QString& url : urls) {
         shareUrl(QUrl(url));
     }
 }

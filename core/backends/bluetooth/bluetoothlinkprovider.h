@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef BLUETOOTHLINKPROVIDER_H
@@ -24,13 +24,13 @@
 #include <QObject>
 #include <QPointer>
 #include <QTimer>
-#include <QtBluetooth/QBluetoothAddress>
-#include <QtBluetooth/QBluetoothLocalDevice>
-#include <QtBluetooth/QBluetoothUuid>
-#include <QtBluetooth/QBluetoothServer>
-#include <QtBluetooth/QBluetoothDeviceDiscoveryAgent>
-#include <QtBluetooth/QBluetoothServiceDiscoveryAgent>
-#include <QtBluetooth/QBluetoothSocket>
+#include <QBluetoothAddress>
+#include <QBluetoothLocalDevice>
+#include <QBluetoothUuid>
+#include <QBluetoothServer>
+#include <QBluetoothDeviceDiscoveryAgent>
+#include <QBluetoothServiceDiscoveryAgent>
+#include <QBluetoothSocket>
 
 #include "../linkprovider.h"
 

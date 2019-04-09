@@ -1,0 +1,2 @@
+add_subdirectory(remotecommands)
+add_subdirectory(findmyphone)

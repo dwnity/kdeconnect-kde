@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef LINKPROVIDER_H
@@ -54,7 +54,7 @@ Q_SIGNALS:
     //NOTE: The provider will destroy the DeviceLink when it's no longer accessible,
     //      and every user should listen to the destroyed signal to remove its references.
     //      That's the reason because there is no "onConnectionLost".
-    void onConnectionReceived(const NetworkPacket& identityPacket, DeviceLink*) const;
+    void onConnectionReceived(const NetworkPacket& identityPacket, DeviceLink*);
 
 };
 

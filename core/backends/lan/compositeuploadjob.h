@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Erik Duisters
+ * Copyright 2018 Erik Duisters <e.duisters1@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef COMPOSITEUPLOADJOB_H
@@ -66,6 +66,8 @@ private:
     quint64 m_totalPayloadSize;
     UploadJob *m_currentJob;
     QElapsedTimer m_timer;
+    quint64 m_prevElapsedTime;
+    bool m_updatePacketPending;
 
     const static quint16 MIN_PORT = 1739;
     const static quint16 MAX_PORT = 1764;
@@ -79,6 +81,7 @@ private Q_SLOTS:
     void slotProcessedAmount(KJob *job, KJob::Unit unit, qulonglong amount);
     void slotResult(KJob *job) override;
     void startNextSubJob();
+    void sendUpdatePacket();
 };
 
 #endif //COMPOSITEUPLOADJOB_H

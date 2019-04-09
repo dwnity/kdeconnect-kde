@@ -17,15 +17,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.1
-import QtQuick.Controls 2.4
+import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.1
 import org.kde.people 1.0
 import org.kde.kirigami 2.4 as Kirigami
 import org.kde.kdeconnect.sms 1.0
+import QtGraphicalEffects 1.0
 
 Kirigami.ScrollablePage
 {
@@ -37,10 +38,19 @@ Kirigami.ScrollablePage
 
     property bool deviceConnected
     property string deviceId
-    property int conversationId
+//     property QtObject device
+    property string conversationId
+    property string initialMessage
 
     property string phoneNumber
     title: person.person && person.person.name ? person.person.name : phoneNumber
+
+    Component.onCompleted: {
+        if (initialMessage.length > 0) {
+            messageField.text = initialMessage;
+            initialMessage = ""
+        }
+    }
 
     /**
      * Build a chat message which is representative of all chat messages
@@ -53,12 +63,6 @@ Kirigami.ScrollablePage
         dateTime: new Date('2000-0-0')
         visible: false
         enabled: false
-    }
-
-    function sendMessage() {
-        console.log("sending sms", page.phoneNumber)
-        model.sourceModel.sendReplyToConversation(message.text)
-        message.text = ""
     }
 
     ListView {
@@ -121,31 +125,78 @@ Kirigami.ScrollablePage
         }
     }
 
-    footer: RowLayout {
+    footer: Pane {
+        id: sendingArea
         enabled: page.deviceConnected
-        ScrollView {
-            Layout.maximumHeight: page.height / 3
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
+        layer.enabled: sendingArea.enabled
+        layer.effect: DropShadow {
+            verticalOffset: 1
+            color: Kirigami.Theme.disabledTextColor
+            samples: 20
+            spread: 0.3
+        }
+        Layout.fillWidth: true
+        padding: 0
+        wheelEnabled: true
+        background: Rectangle {
+            color: Kirigami.Theme.viewBackgroundColor
+        }
+
+        RowLayout {
+            anchors.fill: parent
 
             TextArea {
-                id: message
+                id: messageField
                 Layout.fillWidth: true
-                wrapMode: TextEdit.Wrap
-                placeholderText: i18n("Say hi...")
-                Keys.onPressed: {
-                    if ((event.key == Qt.Key_Return) && !(event.modifiers & Qt.ShiftModifier)) {
-                        sendMessage()
-                        event.accepted = true
+                placeholderText: i18n("Compose message")
+                wrapMode: TextArea.Wrap
+                topPadding: Kirigami.Units.gridUnit * 0.5
+                bottomPadding: topPadding
+                selectByMouse: true
+                background: Item {}
+                Keys.onReturnPressed: {
+                    if (event.key === Qt.Key_Return) {
+                        if (event.modifiers & Qt.ShiftModifier) {
+                            messageField.append("")
+                        } else {
+                            sendButton.onClicked()
+                            event.accepted = true
+                        }
                     }
                 }
             }
-        }
-        Button {
-            text: "Send"
-            onClicked: {
-                sendMessage()
+
+            ToolButton {
+                id: sendButton
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 2
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 2
+                padding: 0
+                Kirigami.Icon {
+                    source: "document-send"
+                    enabled: sendButton.enabled
+                    isMask: true
+                    smooth: true
+                    anchors.centerIn: parent
+                    width: Kirigami.Units.gridUnit * 1.5
+                    height: width
+                }
+                onClicked: {
+                    // don't send empty messages
+                    if (!messageField.text.length) {
+                        return
+                    }
+
+                    // disable the button to prevent sending
+                    // the same message several times
+                    sendButton.enabled = false
+
+                    // send the message
+                    model.sourceModel.sendReplyToConversation(messageField.text)
+                    messageField.text = ""
+
+                    // re-enable the button
+                    sendButton.enabled = true
+                }
             }
         }
     }

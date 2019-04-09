@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef NOTIFICATIONSPLUGIN_H
@@ -25,6 +25,8 @@
 
 #define PACKET_TYPE_NOTIFICATION_REQUEST QStringLiteral("kdeconnect.notification.request")
 #define PACKET_TYPE_NOTIFICATION_REPLY QStringLiteral("kdeconnect.notification.reply")
+#define PACKET_TYPE_NOTIFICATION_ACTION QStringLiteral("kdeconnect.notification.action")
+
 
 /*
  * This class is just a proxy for NotificationsDbusInterface

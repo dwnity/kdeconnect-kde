@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "conversationlistmodel.h"
@@ -31,7 +31,7 @@ ConversationListModel::ConversationListModel(QObject* parent)
     : QStandardItemModel(parent)
     , m_conversationsInterface(nullptr)
 {
-    qCDebug(KDECONNECT_SMS_CONVERSATIONS_LIST_MODEL) << "Constructing" << this;
+    //qCDebug(KDECONNECT_SMS_CONVERSATIONS_LIST_MODEL) << "Constructing" << this;
     auto roles = roleNames();
     roles.insert(FromMeRole, "fromMe");
     roles.insert(AddressRole, "address");
@@ -67,6 +67,7 @@ void ConversationListModel::setDeviceId(const QString& deviceId)
     }
 
     m_deviceId = deviceId;
+    Q_EMIT deviceIdChanged();
 
     // This method still gets called *with a valid deviceID* when the device is not connected while the component is setting up
     // Detect that case and don't do anything.
@@ -191,7 +192,7 @@ KPeople::PersonData* ConversationListModel::lookupPersonByAddress(const QString&
         bool matchingPhoneNumber = longerNumber.endsWith(shorterNumber) && shorterNumber.length() * 2 >= longerNumber.length();
 
         if (address == email || matchingPhoneNumber) {
-            qCDebug(KDECONNECT_SMS_CONVERSATIONS_LIST_MODEL) << "Matched" << address << "to" << person->name();
+            //qCDebug(KDECONNECT_SMS_CONVERSATIONS_LIST_MODEL) << "Matched" << address << "to" << person->name();
             return person;
         }
 

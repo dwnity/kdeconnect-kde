@@ -15,15 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef DEVICELINK_H
 #define DEVICELINK_H
 
 #include <QObject>
-#include <QIODevice> //Fix build on older QCA
-#include <QtCrypto>
 
 #include "core/networkpacket.h"
 

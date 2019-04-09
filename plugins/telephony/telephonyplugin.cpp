@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "telephonyplugin.h"
@@ -73,6 +73,8 @@ KNotification* TelephonyPlugin::createNotification(const NetworkPacket& np)
         content = i18n("Unknown telephony event: %1", event);
 #endif
     }
+
+    Q_EMIT callReceived(type, phoneNumber, contactName);
 
     qCDebug(KDECONNECT_PLUGIN_TELEPHONY) << "Creating notification with type:" << type;
 

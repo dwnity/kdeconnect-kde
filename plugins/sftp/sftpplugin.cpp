@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "sftpplugin.h"
@@ -117,6 +117,15 @@ bool SftpPlugin::isMounted() const
     return d->m_mounter && d->m_mounter->isMounted();
 }
 
+QString SftpPlugin::getMountError()
+{    
+    if (!mountError.isEmpty()) {
+        return mountError;
+    }
+    return QString();
+}
+
+
 bool SftpPlugin::startBrowsing()
 {
     if (mountAndWait()) {
@@ -128,7 +137,7 @@ bool SftpPlugin::startBrowsing()
 
 bool SftpPlugin::receivePacket(const NetworkPacket& np)
 {
-    if (!(fields_c - np.body().keys().toSet()).isEmpty()) {
+    if (!(fields_c - np.body().keys().toSet()).isEmpty() && !np.has("errorMessage")) {
         // packet is invalid
         return false;
     }
@@ -147,7 +156,6 @@ bool SftpPlugin::receivePacket(const NetworkPacket& np)
         remoteDirectories.insert(mountPoint(), i18n("All files"));
         remoteDirectories.insert(mountPoint() + "/DCIM/Camera", i18n("Camera pictures"));
     }
-
     return true;
 }
 
@@ -178,6 +186,7 @@ void SftpPlugin::onUnmounted()
 
 void SftpPlugin::onFailed(const QString& message)
 {
+    mountError = message;
     KNotification::event(KNotification::Error, device()->name(), message);
 
     unmount();

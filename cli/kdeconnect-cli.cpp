@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <QCryptographicHash>
@@ -70,8 +70,16 @@ int main(int argc, char** argv)
     parser.addOption(QCommandLineOption(QStringLiteral("encryption-info"), i18n("Get encryption info about said device")));
     parser.addOption(QCommandLineOption(QStringLiteral("list-commands"), i18n("Lists remote commands and their ids")));
     parser.addOption(QCommandLineOption(QStringLiteral("execute-command"), i18n("Executes a remote command by id"), QStringLiteral("id")));
-    parser.addOption(QCommandLineOption(QStringList{QStringLiteral("k"), QStringLiteral("send-keys")}, i18n("Sends keys to a said device")));
+    parser.addOption(QCommandLineOption(QStringList{QStringLiteral("k"), QStringLiteral("send-keys")}, i18n("Sends keys to a said device"), QStringLiteral("key")));
     parser.addOption(QCommandLineOption(QStringLiteral("my-id"), i18n("Display this device's id and exit")));
+    parser.addOption(QCommandLineOption(QStringLiteral("photo"), i18n("Open the connected device's camera and transfer the photo")));
+
+    //Hidden because it's an implementation detail
+    QCommandLineOption deviceAutocomplete(QStringLiteral("shell-device-autocompletion"));
+    deviceAutocomplete.setHidden(true);
+    deviceAutocomplete.setDescription("Outputs all available devices id's with their name and paired status"); //Not visible, so no translation needed
+    deviceAutocomplete.setValueName("shell");
+    parser.addOption(deviceAutocomplete);
     about.setupCommandLine(&parser);
 
     parser.addHelpOption();
@@ -123,12 +131,39 @@ int main(int argc, char** argv)
             }
         }
         if (displayCount) {
-            QTextStream(stdout) << i18np("1 device found", "%1 devices found", devices.size()) << endl;
+            QTextStream(stderr) << i18np("1 device found", "%1 devices found", devices.size()) << endl;
         } else if (devices.isEmpty()) {
             QTextStream(stderr) << i18n("No devices found") << endl;
         }
 
         blockOnReply(iface.releaseDiscoveryMode(id));
+    } else if (parser.isSet(QStringLiteral("shell-device-autocompletion"))) {
+        //Outputs a list of reachable devices in zsh autocomplete format, with the name as description
+        const QStringList devices = blockOnReply<QStringList>(iface.devices(true, false));
+        for (const QString &id : devices) {
+            DeviceDbusInterface deviceIface(id);
+            QString statusInfo;
+            const bool isTrusted = deviceIface.isTrusted();
+            if (isTrusted) {
+                statusInfo = i18n("(paired)");
+            } else {
+                statusInfo = i18n("(unpaired)");
+            }
+
+            //Description: "device name (paired/unpaired)"
+            QString description = deviceIface.name() + " " + statusInfo;
+            //Replace characters
+            description.replace(QChar('\\'), QStringLiteral("\\\\"));
+            description.replace(QChar('['),  QStringLiteral("\\["));
+            description.replace(QChar(']'),  QStringLiteral("\\]"));
+            description.replace(QChar('\''), QStringLiteral("\\'"));
+            description.replace(QChar('\"'), QStringLiteral("\\\""));
+            description.replace(QChar('\n'), QChar(' '));
+            description.remove(QChar('\0'));
+
+            //Output id and description
+            QTextStream(stdout) << id << '[' << description << ']' << endl;
+        }
     } else if(parser.isSet(QStringLiteral("refresh"))) {
         QDBusMessage msg = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kdeconnect"), QStringLiteral("/modules/kdeconnect"), QStringLiteral("org.kde.kdeconnect.daemon"), QStringLiteral("forceOnNetworkChange"));
         blockOnReply(QDBusConnection::sessionBus().asyncCall(msg));
@@ -182,7 +217,7 @@ int main(int argc, char** argv)
                 QTextStream(stderr) << i18n("waiting for device...") << endl;
                 blockOnReply(iface.acquireDiscoveryMode(id));
 
-                QObject::connect(&iface, &DaemonDbusInterface::deviceAdded, [&](const QString& deviceAddedId) {
+                QObject::connect(&iface, &DaemonDbusInterface::deviceAdded, &iface, [&](const QString& deviceAddedId) {
                     if (device == deviceAddedId) {
                         wait.quit();
                     }
@@ -227,6 +262,9 @@ int main(int argc, char** argv)
             }
         } else if(parser.isSet(QStringLiteral("ring"))) {
             QDBusMessage msg = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kdeconnect"), "/modules/kdeconnect/devices/"+device+"/findmyphone", QStringLiteral("org.kde.kdeconnect.device.findmyphone"), QStringLiteral("ring"));
+            blockOnReply(QDBusConnection::sessionBus().asyncCall(msg));
+        } else if(parser.isSet(QStringLiteral("photo"))) {
+            QDBusMessage msg = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kdeconnect"), "/modules/kdeconnect/devices/"+device+"/photo", QStringLiteral("org.kde.kdeconnect.device.photo"), QStringLiteral("requestPhoto"));
             blockOnReply(QDBusConnection::sessionBus().asyncCall(msg));
         } else if(parser.isSet("send-keys")) {
             QString seq = parser.value("send-keys");

@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -66,7 +66,7 @@ KIO::Error toKioError(const QDBusError::ErrorType type)
         case QDBusError::TimedOut:          
             return KIO::ERR_SERVER_TIMEOUT;
         default:
-            return KIO::ERR_INTERNAL;
+            return KIO::ERR_SLAVE_DEFINED;
     };
 };
 
@@ -128,22 +128,52 @@ void KioKdeconnect::listAllDevices()
     finished();
 }
 
-void KioKdeconnect::listDevice()
+void KioKdeconnect::listDevice(const QString& device)
 {
     infoMessage(i18n("Accessing device..."));
 
-    qCDebug(KDECONNECT_KIO) << "ListDevice" << m_currentDevice;
+    qCDebug(KDECONNECT_KIO) << "ListDevice" << device;
 
-    SftpDbusInterface interface(m_currentDevice);
+    SftpDbusInterface interface(device);
 
     QDBusReply<bool> mountreply = interface.mountAndWait();
+
+    if (mountreply.error().type() == QDBusError::UnknownObject) {
+
+        DaemonDbusInterface daemon;
+
+        auto devsRepl = daemon.devices(false, false);
+        devsRepl.waitForFinished();
+
+        if (!devsRepl.value().contains(device)) {
+            error(KIO::ERR_SLAVE_DEFINED, i18n("No such device: %0").arg(device));
+            return;
+        }
+
+        DeviceDbusInterface dev(device);
+
+        if (!dev.isTrusted()) {
+            error(KIO::ERR_SLAVE_DEFINED, i18n("%0 is not paired").arg(dev.name()));
+            return;
+        }
+
+        if (!dev.isReachable()) {
+            error(KIO::ERR_SLAVE_DEFINED, i18n("%0 is not connected").arg(dev.name()));
+            return;
+        }
+
+        if (!dev.hasPlugin(QStringLiteral("kdeconnect_sftp"))) {
+            error(KIO::ERR_SLAVE_DEFINED, i18n("%0 has no Remote Filesystem plugin").arg(dev.name()));
+            return;
+        }
+    }
 
     if (handleDBusError(mountreply, this)) {
         return;
     }
 
     if (!mountreply.value()) {
-        error(KIO::ERR_COULD_NOT_MOUNT, i18n("Could not mount device filesystem"));
+        error(KIO::ERR_SLAVE_DEFINED, interface.getMountError());
         return;
     }
 
@@ -191,20 +221,18 @@ void KioKdeconnect::listDir(const QUrl& url)
 {
     qCDebug(KDECONNECT_KIO) << "Listing..." << url;
 
-    /// Url is not used here because all we could care about the url is the host, and that's already
-    /// handled in @p setHost
-    Q_UNUSED(url);
-
     if (!m_dbusInterface->isValid()) {
         infoMessage(i18n("Could not contact background service."));
         finished();
         return;
     }
 
-    if (m_currentDevice.isEmpty()) {
+    QString currentDevice = url.host();
+
+    if (currentDevice.isEmpty()) {
         listAllDevices();
     } else {
-        listDevice();
+        listDevice(currentDevice);
     }
 }
 
@@ -214,6 +242,13 @@ void KioKdeconnect::stat(const QUrl& url)
 
     KIO::UDSEntry entry;
     entry.insert(KIO::UDSEntry::UDS_FILE_TYPE, S_IFDIR);
+
+    QString currentDevice = url.host();
+    if (!currentDevice.isEmpty()) {
+        SftpDbusInterface interface(currentDevice);
+        entry.insert(KIO::UDSEntry::UDS_LOCAL_PATH, interface.mountPoint());
+    }
+
     statEntry(entry);
 
     finished();
@@ -224,22 +259,6 @@ void KioKdeconnect::get(const QUrl& url)
     qCDebug(KDECONNECT_KIO) << "Get: " << url;
     mimeType(QLatin1String(""));
     finished();
-}
-
-void KioKdeconnect::setHost(const QString& hostName, quint16 port, const QString& user, const QString& pass)
-{
-
-    //This is called before everything else to set the file we want to show
-
-    qCDebug(KDECONNECT_KIO) << "Setting host: " << hostName;
-
-    // In this kio only the hostname is used
-    Q_UNUSED(port)
-    Q_UNUSED(user)
-    Q_UNUSED(pass)
-
-    m_currentDevice = hostName;
-
 }
 
 //needed for JSON file embedding

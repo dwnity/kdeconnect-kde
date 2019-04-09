@@ -12,6 +12,7 @@
                 "Name[en_GB]": "Nicolas Fella",
                 "Name[es]": "Nicolas Fella",
                 "Name[eu]": "Nicolas Fella",
+                "Name[fi]": "Nicolas Fella",
                 "Name[fr]": "Nicolas Fella",
                 "Name[gl]": "Nicolas Fella",
                 "Name[it]": "Nicolas Fella",
@@ -21,6 +22,7 @@
                 "Name[pl]": "Nicolas Fella",
                 "Name[pt]": "Nicolas Fella",
                 "Name[pt_BR]": "Nicolas Fella",
+                "Name[sk]": "Nicolas Fella",
                 "Name[sv]": "Nicolas Fella",
                 "Name[uk]": "Nicolas Fella",
                 "Name[x-test]": "xxNicolas Fellaxx",
@@ -36,6 +38,7 @@
         "Description[en_GB]": "Control the system volume from your phone",
         "Description[es]": "Controle el volumen del sistema desde su teléfono",
         "Description[eu]": "Kontrolatu sistemaren bolumena zure telefonotik",
+        "Description[fi]": "Säädä järjestelmän äänenvoimakkuutta puhelimestasi",
         "Description[fr]": "Contrôler le volume du système depuis votre téléphone",
         "Description[gl]": "Controlar o volume do sistema desde o teléfono",
         "Description[it]": "Controlla il volume di sistema dal tuo telefono",
@@ -45,6 +48,7 @@
         "Description[pl]": "Steruj głośnością systemu z telefonu",
         "Description[pt]": "Controle o volume do sistema a partir do seu telemóvel",
         "Description[pt_BR]": "Controle o volume do sistema com o seu telefone",
+        "Description[sk]": "Ovládajte hlasitosť systému z vášho telefónu",
         "Description[sv]": "Kontrollera systemvolymen från telefonen",
         "Description[uk]": "Керування системним томом з вашого телефону",
         "Description[x-test]": "xxControl the system volume from your phonexx",
@@ -62,6 +66,7 @@
         "Name[en_GB]": "System volume",
         "Name[es]": "Volumen del sistema",
         "Name[eu]": "Sistemaren bolumena",
+        "Name[fi]": "Järjestelmän äänenvoimakkuus",
         "Name[fr]": "Volume du système",
         "Name[gl]": "Volume do sistema",
         "Name[it]": "Volume di sistema",
@@ -71,6 +76,7 @@
         "Name[pl]": "Głośność na systemie",
         "Name[pt]": "Volume do sistema",
         "Name[pt_BR]": "Volume do sistema",
+        "Name[sk]": "Systémová hlasitosť",
         "Name[sv]": "Systemvolym",
         "Name[uk]": "Системний том",
         "Name[x-test]": "xxSystem volumexx",
@@ -80,7 +86,7 @@
             "KdeConnect/Plugin"
         ],
         "Version": "0.1",
-        "Website": "http://nicolasfella.wordpress.com"
+        "Website": "https://nicolasfella.wordpress.com"
     },
     "X-KdeConnect-OutgoingPacketType": [
         "kdeconnect.systemvolume"

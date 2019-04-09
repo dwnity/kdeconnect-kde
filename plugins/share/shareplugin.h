@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef SHAREPLUGIN_H
@@ -26,6 +26,7 @@
 #include <core/kdeconnectplugin.h>
 
 #define PACKET_TYPE_SHARE_REQUEST QStringLiteral("kdeconnect.share.request")
+#define PACKET_TYPE_SHARE_REQUEST_UPDATE QStringLiteral("kdeconnect.share.request.update")
 
 class SharePlugin
     : public KdeConnectPlugin
@@ -51,7 +52,7 @@ private Q_SLOTS:
     void openDestinationFolder();
 
 Q_SIGNALS:
-    void shareReceived(const QString& url);
+    Q_SCRIPTABLE void shareReceived(const QString& url);
 
 private:
     void shareUrl(const QUrl& url);

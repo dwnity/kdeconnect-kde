@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Erik Duisters
+ * Copyright 2018 Erik Duisters <e.duisters1@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "compositeuploadjob.h"
@@ -25,6 +25,7 @@
 #include <KJobTrackerInterface>
 #include "lanlinkprovider.h"
 #include <daemon.h>
+#include "plugins/share/shareplugin.h"
 
 CompositeUploadJob::CompositeUploadJob(const QString& deviceId, bool displayNotification) 
     : KCompositeJob()
@@ -39,6 +40,8 @@ CompositeUploadJob::CompositeUploadJob(const QString& deviceId, bool displayNoti
     , m_totalSendPayloadSize(0)
     , m_totalPayloadSize(0)
     , m_currentJob(nullptr)
+    , m_prevElapsedTime(0)
+    , m_updatePacketPending(false)
 {
     setCapabilities(Killable);
     
@@ -203,12 +206,27 @@ bool CompositeUploadJob::addSubjob(KJob* job)
         }
         
         emitDescription(filename);
+
+        if (m_running && m_currentJob && !m_updatePacketPending) {
+            m_updatePacketPending = true;
+            QMetaObject::invokeMethod(this, "sendUpdatePacket", Qt::QueuedConnection);
+        }
         
         return KCompositeJob::addSubjob(job);
     } else {
         qCDebug(KDECONNECT_CORE) << "CompositeUploadJob::addSubjob() - you can only add UploadJob's, ignoring";
         return false;
     }
+}
+
+void CompositeUploadJob::sendUpdatePacket() {
+    NetworkPacket np(PACKET_TYPE_SHARE_REQUEST_UPDATE);
+    np.set<int>(QStringLiteral("numberOfFiles"), m_totalJobs);
+    np.set<quint64>(QStringLiteral("totalPayloadSize"), m_totalPayloadSize);
+    
+    Daemon::instance()->getDevice(m_deviceId)->sendPacket(np);
+    
+    m_updatePacketPending = false;
 }
 
 bool CompositeUploadJob::doKill()
@@ -226,13 +244,16 @@ void CompositeUploadJob::slotProcessedAmount(KJob *job, KJob::Unit unit, qulongl
     Q_UNUSED(job);
     
     m_currentJobSendPayloadSize = amount;
-    
     quint64 uploaded = m_totalSendPayloadSize + m_currentJobSendPayloadSize;
-    setProcessedAmount(unit, uploaded);
     
-    const auto elapsed = m_timer.elapsed();
-    if (elapsed > 0) {
-        emitSpeed((1000 * uploaded) / elapsed);
+    if (uploaded == m_totalPayloadSize || m_prevElapsedTime == 0 || m_timer.elapsed() - m_prevElapsedTime >= 100) {
+        m_prevElapsedTime = m_timer.elapsed();
+        setProcessedAmount(unit, uploaded);
+    
+        const auto elapsed = m_timer.elapsed();
+        if (elapsed > 0) {
+            emitSpeed((1000 * uploaded) / elapsed);
+        }
     }
 }
 
@@ -250,8 +271,11 @@ void CompositeUploadJob::slotResult(KJob *job) {
         m_currentJobNum++;
         startNextSubJob();
     } else {
-        Q_EMIT description(this, i18n("Finished sending to %1", Daemon::instance()->getDevice(this->m_deviceId)->name()),
-                           { QStringLiteral(""), i18np("Sent 1 file", "Sent %1 files", m_totalJobs) }
+        QPair<QString, QString> field2;
+        field2.first = QString("Files");
+        field2.second = i18np("Sent 1 file", "Sent %1 files", m_totalJobs);
+        Q_EMIT description(this, i18n("Sending to %1", Daemon::instance()->getDevice(this->m_deviceId)->name()),
+                           { QString(), QString() }, field2
         );
         emitResult();
     }

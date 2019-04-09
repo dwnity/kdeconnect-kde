@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef SMSPLUGIN_H
@@ -131,13 +131,6 @@ private:
 
     QDBusInterface m_telepathyInterface;
     ConversationsDbusInterface* m_conversationInterface;
-
-    /*
-     * Keep a map of all interfaces ever constructed
-     * See comments in ~SmsPlugin() for the reason
-     */
-    static QMap<QString, ConversationsDbusInterface*> conversationInterfaces;
-
 };
 
 #endif

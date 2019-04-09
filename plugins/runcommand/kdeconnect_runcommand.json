@@ -93,7 +93,7 @@
         "Description[eu]": "Exekutatu kontsolako komandoak urrunetik",
         "Description[fi]": "Suorita konsolikomentoja etänä",
         "Description[fr]": "Exécute des commandes console à distance",
-        "Description[gl]": "Executar ordes de consola remotamente.",
+        "Description[gl]": "Executar ordes de consola remotamente",
         "Description[id]": "Eksekusikan perintah konsole secara jarak jauh",
         "Description[it]": "Esegue i comandi della console da remoto",
         "Description[ko]": "원격으로 콘솔 명령 실행",
@@ -158,7 +158,7 @@
             "KdeConnect/Plugin"
         ],
         "Version": "0.1",
-        "Website": "http://albertvaka.wordpress.com"
+        "Website": "https://albertvaka.wordpress.com"
     },
     "X-KdeConnect-OutgoingPacketType": [
         "kdeconnect.runcommand"

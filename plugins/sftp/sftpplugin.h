@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef SFTPPLUGIN_H
@@ -50,6 +50,7 @@ public Q_SLOTS:
     Q_SCRIPTABLE void unmount();
     Q_SCRIPTABLE bool mountAndWait();
     Q_SCRIPTABLE bool isMounted() const;
+    Q_SCRIPTABLE QString getMountError();
 
     Q_SCRIPTABLE bool startBrowsing();
     Q_SCRIPTABLE QString mountPoint();
@@ -71,6 +72,7 @@ private:
     QString deviceId; //Storing it to avoid accessing device() from the destructor which could cause a crash
 
     QVariantMap remoteDirectories; //Actually a QMap<String, String>, but QDBus prefers this
+    QString mountError;
 };
 
 

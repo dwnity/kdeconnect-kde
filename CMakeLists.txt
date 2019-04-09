@@ -24,13 +24,14 @@ if (SAILFISHOS)
 else()
     set(KF5_MIN_VERSION "5.42.0")
     set(QT_MIN_VERSION "5.7.0")
-    set(KF5_REQUIRED_COMPONENTS I18n ConfigWidgets DBusAddons IconThemes Notifications KIO KCMUtils)
+    set(KF5_REQUIRED_COMPONENTS I18n ConfigWidgets DBusAddons IconThemes Notifications KIO KCMUtils Service)
     set(KF5_OPTIONAL_COMPONENTS DocTools)
     if(UNIX)
-        set(KF5_OPTIONAL_COMPONENTS ${KF5_OPTIONAL_COMPONENTS} PulseAudioQt)
+        set(KF5_OPTIONAL_COMPONENTS ${KF5_OPTIONAL_COMPONENTS} Runner)
     endif()
     set(QCA_MIN_VERSION "2.1.0")
     find_package(Qca-qt5 ${QCA_MIN_VERSION} REQUIRED)
+    find_package(KF5PulseAudioQt)
     add_definitions(-DQT_NO_URL_CAST_FROM_STRING -DQT_NO_KEYWORDS)
 endif()
 
@@ -48,6 +49,13 @@ set_package_properties(Phonon4Qt5 PROPERTIES
    DESCRIPTION "Qt-based audio library"
    TYPE OPTIONAL
    PURPOSE "Required for Find My Device plugin"
+)
+
+set_package_properties(KF5Kirigami2 PROPERTIES
+  DESCRIPTION "QtQuick plugins to build user interfaces based on KDE UX guidelines"
+  PURPOSE "Required for KDE Connect's QML-based GUI applications"
+  URL "https://www.kde.org/products/kirigami/"
+  TYPE RUNTIME
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
@@ -86,17 +94,15 @@ add_subdirectory(data)
 option(EXPERIMENTALAPP_ENABLED OFF)
 if(EXPERIMENTALAPP_ENABLED)
   find_package(KF5Kirigami2)
-  set_package_properties(KF5Kirigami2 PROPERTIES
-    DESCRIPTION "QtQuick plugins to build user interfaces based on KDE UX guidelines"
-    PURPOSE "Required for kcapp"
-    URL "https://www.kde.org/products/kirigami/"
-    TYPE RUNTIME
-)
   add_subdirectory(app)
 endif()
 add_subdirectory(plugins)
 add_subdirectory(cli)
 add_subdirectory(declarativeplugin)
+
+if(KF5Runner_FOUND)
+    add_subdirectory(runners)
+endif()
 
 if (NOT SAILFISHOS)
     add_subdirectory(indicator)
@@ -108,6 +114,7 @@ endif()
 
 option(SMSAPP_ENABLED OFF)
 if(SMSAPP_ENABLED)
+    find_package(KF5Kirigami2)
     find_package(KF5People REQUIRED)
     find_package(KF5PeopleVCard)
     set_package_properties(KF5PeopleVCard PROPERTIES

@@ -15,12 +15,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "batteryplugin.h"
-
-#include <QIcon>
 
 #include <KLocalizedString>
 #include <KPluginFactory>
@@ -39,7 +37,7 @@ BatteryPlugin::BatteryPlugin(QObject* parent, const QVariantList& args)
 {
 
     //TODO: Add battery reporting, could be based on:
-    // http://kde-apps.org/content/show.php/battery+plasmoid+with+remaining+time?content=120309
+    // https://www.linux-apps.com/content/show.php/battery+plasmoid+with+remaining+time?content=120309
 
 }
 

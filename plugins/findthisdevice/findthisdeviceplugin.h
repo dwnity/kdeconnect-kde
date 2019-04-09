@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef FINDTHISDEVICEPLUGIN_H
@@ -28,6 +28,14 @@
 #define PACKET_TYPE_FINDMYPHONE_REQUEST QStringLiteral("kdeconnect.findmyphone.request")
 
 Q_DECLARE_LOGGING_CATEGORY(KDECONNECT_PLUGIN_FINDTHISDEVICE)
+
+inline QString defaultSound(){
+            #ifdef Q_OS_WIN
+            return QStringLiteral("Ring01.wav");
+            #else
+            return QStringLiteral("Oxygen-Im-Phone-Ring.ogg");
+            #endif
+        }
 
 class FindThisDevicePlugin
     : public KdeConnectPlugin

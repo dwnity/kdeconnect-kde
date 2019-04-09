@@ -15,18 +15,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <contactsplugin.h>
 
-#include <KLocalizedString>
 #include <KPluginFactory>
 
-#include <QDebug>
 #include <QDBusConnection>
-#include <QtDBus>
-#include <QEventLoop>
+#include <QDBusMetaType>
 #include <QLoggingCategory>
 #include <QFile>
 #include <QDir>
@@ -135,7 +132,7 @@ bool ContactsPlugin::handleResponseUIDsTimestamps (const NetworkPacket& np) {
             if (!line.startsWith("X-KDECONNECT-TIMESTAMP:")) {
                 continue;
             }
-            QStringList parts = line.split(":");
+            QStringList parts = line.split(QLatin1Char(':'));
             QString timestamp = parts[1];
 
             qint32 remoteTimestamp = np.get<qint32>(ID);

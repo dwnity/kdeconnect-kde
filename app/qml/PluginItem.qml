@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.2
@@ -24,19 +24,20 @@ import QtQuick.Layouts 1.1
 import org.kde.kirigami 2.0 as Kirigami
 import org.kde.kdeconnect 1.0
 
-Kirigami.BasicListItem
+QtObject
 {
     property alias pluginName: checker.pluginName
+    property alias iconName: checker.iconName
+    property alias loaded: checker.available
     property var interfaceFactory
     property var component
+    property var name
 
     readonly property var checker: PluginChecker {
         id: checker
         device: deviceView.currentDevice
     }
-    visible: checker.available
-    icon: checker.iconName
-    onClicked: {
+    property var onClick: function() {
         if (component === "" || !interfaceFactory)
             return;
 

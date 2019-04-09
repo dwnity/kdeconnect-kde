@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "../core/backends/lan/server.h"
@@ -101,11 +101,11 @@ void TestSslSocketLineReader::testTrustedDevice()
 {
 
     int maxAttemps = 5;
-    QCOMPARE(true, m_server->hasPendingConnections());
     while(!m_server->hasPendingConnections() && maxAttemps > 0) {
         --maxAttemps;
         QTest::qSleep(1000);
     }
+    QCOMPARE(true, m_server->hasPendingConnections());
 
     QSslSocket* serverSocket = m_server->nextPendingConnection();
 
@@ -123,10 +123,18 @@ void TestSslSocketLineReader::testTrustedDevice()
     m_clientSocket->setPeerVerifyMode(QSslSocket::VerifyPeer);
     m_clientSocket->addCaCertificate(serverSocket->localCertificate());
 
-    connect(m_clientSocket, &QSslSocket::encrypted, &m_loop, &QEventLoop::quit);
+    int connected_sockets = 0;
+    auto connected_lambda = [&](){
+        connected_sockets++;
+        if (connected_sockets >= 2) {
+            m_loop.quit();
+        }
+    };
+    connect(serverSocket, &QSslSocket::encrypted, connected_lambda);
+    connect(m_clientSocket, &QSslSocket::encrypted, connected_lambda);
     serverSocket->startServerEncryption();
     m_clientSocket->startClientEncryption();
-    m_loop.exec();
+    m_loop.exec(); //Block until QEventLoop::quit gets called by the lambda
 
     // Both client and server socket should be encrypted here and should have remote certificate because VerifyPeer is used
     QVERIFY2(m_clientSocket->isOpen(), "Client socket already closed");
@@ -163,11 +171,11 @@ void TestSslSocketLineReader::testTrustedDevice()
 void TestSslSocketLineReader::testUntrustedDevice()
 {
     int maxAttemps = 5;
-    QCOMPARE(true, m_server->hasPendingConnections());
     while(!m_server->hasPendingConnections() && maxAttemps > 0) {
         --maxAttemps;
         QTest::qSleep(1000);
     }
+    QCOMPARE(true, m_server->hasPendingConnections());
 
     QSslSocket* serverSocket = m_server->nextPendingConnection();
 
@@ -183,10 +191,18 @@ void TestSslSocketLineReader::testUntrustedDevice()
     m_clientSocket->setPeerVerifyName(QStringLiteral("Test Server"));
     m_clientSocket->setPeerVerifyMode(QSslSocket::QueryPeer);
 
-    connect(m_clientSocket, &QSslSocket::encrypted, &m_loop, &QEventLoop::quit);
+    int connected_sockets = 0;
+    auto connected_lambda = [&](){
+        connected_sockets++;
+        if (connected_sockets >= 2) {
+            m_loop.quit();
+        }
+    };
+    connect(serverSocket, &QSslSocket::encrypted, connected_lambda);
+    connect(m_clientSocket, &QSslSocket::encrypted, connected_lambda);
     serverSocket->startServerEncryption();
     m_clientSocket->startClientEncryption();
-    m_loop.exec();
+    m_loop.exec(); //Block until QEventLoop::quit gets called by the lambda
 
     QVERIFY2(m_clientSocket->isOpen(), "Client socket already closed");
     QVERIFY2(serverSocket->isOpen(), "Server socket already closed");
@@ -226,6 +242,7 @@ void TestSslSocketLineReader::testTrustedDeviceWithWrongCertificate()
         --maxAttemps;
         QTest::qSleep(1000);
     }
+    QCOMPARE(true, m_server->hasPendingConnections());
 
     QSslSocket* serverSocket = m_server->nextPendingConnection();
 

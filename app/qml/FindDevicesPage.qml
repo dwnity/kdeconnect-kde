@@ -15,13 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import QtQuick 2.2
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.1
-import org.kde.kirigami 2.0 as Kirigami
+import org.kde.kirigami 2.7 as Kirigami
 import org.kde.kdeconnect 1.0
 
 Kirigami.ScrollablePage
@@ -46,6 +46,7 @@ Kirigami.ScrollablePage
             property: "status"
             delegate: Kirigami.Heading {
                 level: 4
+                leftPadding: Kirigami.Units.smallSpacing
                 text: switch (parseInt(section))
                 {
                     case DevicesModel.Paired:
@@ -65,6 +66,7 @@ Kirigami.ScrollablePage
         delegate: Kirigami.BasicListItem {
             width: ListView.view.width
             icon: iconName
+            iconColor: "transparent"
             label: display + "\n" + toolTip
             onClicked: {
                 pageStack.push(

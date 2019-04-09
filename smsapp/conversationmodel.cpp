@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "conversationmodel.h"
@@ -51,7 +51,8 @@ void ConversationModel::setThreadId(const qint64& threadId)
 
     m_threadId = threadId;
     clear();
-    if (threadId != INVALID_THREAD_ID) {
+    knownMessageIDs.clear();
+    if (m_threadId != INVALID_THREAD_ID && m_deviceId != "") {
         requestMoreMessages();
     }
 }

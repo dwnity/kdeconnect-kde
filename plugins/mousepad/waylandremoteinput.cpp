@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "waylandremoteinput.h"
@@ -46,6 +46,7 @@ WaylandRemoteInput::WaylandRemoteInput(QObject* parent)
             m_waylandInput = registry->createFakeInput(name, version, this);
         }
     );
+    connect(registry, &Registry::fakeInputRemoved, m_waylandInput, &QObject::deleteLater);
     registry->setup();
 }
 

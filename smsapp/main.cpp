@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "conversationmodel.h"
@@ -31,7 +31,6 @@
 #include <KLocalizedString>
 #include <KLocalizedContext>
 #include <KDBusService>
-#include <QtQml>
 
 int main(int argc, char *argv[])
 {
@@ -42,13 +41,20 @@ int main(int argc, char *argv[])
     aboutData.addAuthor(i18n("Simon Redman"), {}, "simon@ergotech.com");
     KAboutData::setApplicationData(aboutData);
 
+    QString initialMessage;
+
     {
         QCommandLineParser parser;
         aboutData.setupCommandLine(&parser);
         parser.addVersionOption();
         parser.addHelpOption();
+        parser.addOption(QCommandLineOption(QStringLiteral("message"), i18n("Send a message"), i18n("message")));
         parser.process(app);
         aboutData.processCommandLine(&parser);
+
+        if (parser.isSet(QStringLiteral("message"))) {
+            initialMessage = parser.value(QStringLiteral("message"));
+        }
     }
 
     KDBusService service(KDBusService::Unique);
@@ -59,6 +65,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+    engine.rootContext()->setContextProperty(QStringLiteral("_initialMessage"), QVariant(initialMessage));
     engine.load(QUrl("qrc:/qml/main.qml"));
 
     return app.exec();

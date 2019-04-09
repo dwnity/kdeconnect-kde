@@ -15,14 +15,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef DEVICEINDICATOR_H
 #define DEVICEINDICATOR_H
 
 #include <QMenu>
-#include "interfaces/dbusinterfaces.h"
+
+class DeviceDbusInterface;
 
 class DeviceIndicator : public QMenu
 {

@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "daemon.h"
@@ -77,6 +77,9 @@ Daemon::Daemon(QObject* parent, bool testMode)
         d->m_linkProviders.insert(new LanLinkProvider());
         #ifdef KDECONNECT_BLUETOOTH
             d->m_linkProviders.insert(new BluetoothLinkProvider());
+        #endif
+        #ifdef KDECONNECT_LOOPBACK
+            d->m_linkProviders.insert(new LoopbackLinkProvider());
         #endif
     }
 

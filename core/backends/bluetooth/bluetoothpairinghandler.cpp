@@ -15,15 +15,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "bluetoothpairinghandler.h"
 
 #include <KLocalizedString>
 
 #include "core_debug.h"
 #include "daemon.h"
 #include "kdeconnectconfig.h"
-#include "bluetoothpairinghandler.h"
 #include "networkpackettypes.h"
 
 BluetoothPairingHandler::BluetoothPairingHandler(DeviceLink* deviceLink)

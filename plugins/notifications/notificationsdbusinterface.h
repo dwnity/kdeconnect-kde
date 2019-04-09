@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef NOTIFICATIONSDBUSINTERFACE_H
@@ -52,6 +52,7 @@ public:
 public Q_SLOTS:
     Q_SCRIPTABLE QStringList activeNotifications();
     Q_SCRIPTABLE void sendReply(const QString& replyId, const QString& message);
+    Q_SCRIPTABLE void sendAction(const QString& key, const QString& action);
 
 Q_SIGNALS:
     Q_SCRIPTABLE void notificationPosted(const QString& publicId);

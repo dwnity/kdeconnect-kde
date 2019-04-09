@@ -15,12 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "landevicelink.h"
 
 #include <KLocalizedString>
 
-#include "landevicelink.h"
 #include "core_debug.h"
 #include "kdeconnectconfig.h"
 #include "backends/linkprovider.h"
@@ -116,7 +117,7 @@ void LanDeviceLink::dataReceived()
     if (m_socketLineReader->bytesAvailable() == 0) return;
 
     const QByteArray serializedPacket = m_socketLineReader->readLine();
-    NetworkPacket packet(QString::null);
+    NetworkPacket packet((QString()));
     NetworkPacket::unserialize(serializedPacket, &packet);
 
     //qCDebug(KDECONNECT_CORE) << "LanDeviceLink dataReceived" << serializedPacket;

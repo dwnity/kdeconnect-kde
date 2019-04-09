@@ -15,12 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef WAYLANDREMOTEINPUT_H
 #define WAYLANDREMOTEINPUT_H
 
+#include <QPointer>
 #include "abstractremoteinput.h"
 
 namespace KWayland
@@ -44,7 +45,7 @@ public:
 private:
     void setupWaylandIntegration();
 
-    KWayland::Client::FakeInput* m_waylandInput;
+    QPointer<KWayland::Client::FakeInput> m_waylandInput;
     bool m_waylandAuthenticationRequested;
 };
 

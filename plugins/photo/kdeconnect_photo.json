@@ -1,0 +1,82 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "nicolas.fella@gmx.de",
+                "Name": "Nicolas Fella",
+                "Name[ca@valencia]": "Nicolas Fella",
+                "Name[ca]": "Nicolas Fella",
+                "Name[cs]": "Nicolas Fella",
+                "Name[de]": "Nicolas Fella",
+                "Name[en_GB]": "Nicolas Fella",
+                "Name[es]": "Nicolas Fella",
+                "Name[eu]": "Nicolas Fella",
+                "Name[fi]": "Nicolas Fella",
+                "Name[fr]": "Nicolas Fella",
+                "Name[gl]": "Nicolas Fella",
+                "Name[it]": "Nicolas Fella",
+                "Name[ko]": "Nicolas Fella",
+                "Name[nl]": "Nicolas Fella",
+                "Name[nn]": "Nicolas Fella",
+                "Name[pl]": "Nicolas Fella",
+                "Name[pt]": "Nicolas Fella",
+                "Name[pt_BR]": "Nicolas Fella",
+                "Name[sk]": "Nicolas Fella",
+                "Name[sv]": "Nicolas Fella",
+                "Name[uk]": "Nicolas Fella",
+                "Name[x-test]": "xxNicolas Fellaxx",
+                "Name[zh_CN]": "Nicolas Fella",
+                "Name[zh_TW]": "Nicolas Fella"
+            }
+        ],
+        "Description": "Use a connected device to take a photo",
+        "Description[ca@valencia]": "Usa un dispositiu connectat per fer una fotografia",
+        "Description[ca]": "Usa un dispositiu connectat per fer una fotografia",
+        "Description[en_GB]": "Use a connected device to take a photo",
+        "Description[es]": "Usar un dispositivo conectado para tomar una fotografía",
+        "Description[fr]": "Utiliser un périphérique connecté pour prendre une photo",
+        "Description[gl]": "Usar un dispositivo conectado para sacar unha foto",
+        "Description[it]": "Usa un dispositivo connesso per scattare una foto",
+        "Description[nl]": "Gebruik een verbonden apparaat om een foto te nemen",
+        "Description[nn]": "Bruk tilkopla eining til å ta eit bilete",
+        "Description[pt]": "Usar um dispositivo ligado para tirar uma fotografia",
+        "Description[pt_BR]": "Usa um dispositivo conectado para tirar uma foto",
+        "Description[sk]": "Použiť pripojené zariadenie na vytvorenie fotky",
+        "Description[sv]": "Använd en ansluten apparat för att ta ett foto",
+        "Description[uk]": "Скористатися з'єднаним пристроєм для фотографування",
+        "Description[x-test]": "xxUse a connected device to take a photoxx",
+        "Description[zh_TW]": "使用連結裝置拍照",
+        "EnabledByDefault": true,
+        "Icon": "camera-photo",
+        "Id": "kdeconnect_photo",
+        "License": "GPL",
+        "Name": "Photo",
+        "Name[ca@valencia]": "Fotografia",
+        "Name[ca]": "Fotografia",
+        "Name[en_GB]": "Photo",
+        "Name[es]": "Fotografía",
+        "Name[fr]": "Photo",
+        "Name[gl]": "Foto",
+        "Name[it]": "Foto",
+        "Name[nl]": "Foto",
+        "Name[nn]": "Foto",
+        "Name[pt]": "Fotografia",
+        "Name[pt_BR]": "Foto",
+        "Name[sk]": "Fotka",
+        "Name[sv]": "Foto",
+        "Name[uk]": "Фото",
+        "Name[x-test]": "xxPhotoxx",
+        "Name[zh_TW]": "相片",
+        "ServiceTypes": [
+            "KdeConnect/Plugin"
+        ],
+        "Version": "0.1",
+        "Website": "https://nicolasfella.wordpress.com"
+    },
+    "X-KdeConnect-OutgoingPacketType": [
+        "kdeconnect.photo.request"
+    ],
+    "X-KdeConnect-SupportedPacketType": [
+        "kdeconnect.photo"
+    ]
+}

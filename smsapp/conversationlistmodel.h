@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef CONVERSATIONLISTMODEL_H
@@ -68,7 +68,7 @@ class ConversationListModel
     : public QStandardItemModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString deviceId READ deviceId WRITE setDeviceId)
+    Q_PROPERTY(QString deviceId READ deviceId WRITE setDeviceId NOTIFY deviceIdChanged)
 
 public:
     ConversationListModel(QObject* parent = nullptr);
@@ -91,6 +91,9 @@ public Q_SLOTS:
     void handleConversationUpdated(const QVariantMap& msg);
     void createRowFromMessage(const QVariantMap& message);
     void printDBusError(const QDBusError& error);
+
+Q_SIGNALS:
+    void deviceIdChanged();
 
 private:
     /**

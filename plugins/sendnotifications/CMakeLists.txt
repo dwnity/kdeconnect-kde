@@ -18,7 +18,6 @@ kdeconnect_add_plugin(kdeconnect_sendnotifications JSON "${CMAKE_CURRENT_BINARY_
 target_link_libraries(kdeconnect_sendnotifications
     kdeconnectcore
     Qt5::DBus
-    ${NOTIFICATION_LIB}
     KF5::I18n
     Qt5::Gui
     KF5::IconThemes

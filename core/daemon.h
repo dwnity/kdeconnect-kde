@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef KDECONNECT_DAEMON_H
@@ -89,7 +89,7 @@ private Q_SLOTS:
     void onNewDeviceLink(const NetworkPacket& identityPacket, DeviceLink* dl);
     void onDeviceStatusChanged();
 
-private:
+protected:
     void addDevice(Device* device);
     bool isDiscoveringDevices() const;
     void removeDevice(Device* d);

@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "mounter.h"
@@ -80,6 +80,11 @@ void Mounter::onPackageReceived(const NetworkPacket& np)
     {
         qCDebug(KDECONNECT_PLUGIN_SFTP) << "SFTP server stopped";
         unmount(false);
+        return;
+    }
+    
+    if (np.has("errorMessage")) {
+        Q_EMIT failed(np.get<QString>("errorMessage", ""));
         return;
     }
 
@@ -163,10 +168,10 @@ void Mounter::onStarted()
     //m_proc->setStandardErrorFile("/tmp/kdeconnect-sftp.err");
 
     auto proc = m_proc;
-    connect(m_proc, &KProcess::readyReadStandardError, [proc]() {
+    connect(m_proc, &KProcess::readyReadStandardError, this, [proc]() {
         qCDebug(KDECONNECT_PLUGIN_SFTP) << "stderr: " << proc->readAll();
     });
-    connect(m_proc, &KProcess::readyReadStandardOutput, [proc]() {
+    connect(m_proc, &KProcess::readyReadStandardOutput, this, [proc]() {
         qCDebug(KDECONNECT_PLUGIN_SFTP) << "stdout:" << proc->readAll();
     });
 }

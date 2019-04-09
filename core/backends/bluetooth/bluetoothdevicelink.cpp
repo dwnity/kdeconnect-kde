@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "bluetoothdevicelink.h"
@@ -79,7 +79,7 @@ void BluetoothDeviceLink::dataReceived()
 
     //qCDebug(KDECONNECT_CORE) << "BluetoothDeviceLink dataReceived" << packet;
 
-    NetworkPacket packet(QString::null);
+    NetworkPacket packet((QString()));
     NetworkPacket::unserialize(serializedPacket, &packet);
 
     if (packet.type() == PACKET_TYPE_PAIR) {

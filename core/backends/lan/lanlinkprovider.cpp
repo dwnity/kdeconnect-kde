@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "lanlinkprovider.h"
@@ -352,6 +352,7 @@ void LanLinkProvider::newConnection()
 void LanLinkProvider::dataReceived()
 {
     QSslSocket* socket = qobject_cast<QSslSocket*>(sender());
+    socket->startTransaction();
 
     const QByteArray data = socket->readLine();
 
@@ -362,8 +363,10 @@ void LanLinkProvider::dataReceived()
 
     if (!success) {
         delete np;
+        socket->rollbackTransaction();
         return;
     }
+    socket->commitTransaction();
 
     if (np->type() != PACKET_TYPE_IDENTITY) {
         qCWarning(KDECONNECT_CORE) << "LanLinkProvider/newConnection: Expected identity, received " << np->type();
