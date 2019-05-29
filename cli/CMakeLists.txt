@@ -3,6 +3,8 @@ add_definitions(-DTRANSLATION_DOMAIN=\"kdeconnect-cli\")
 add_executable(kdeconnect-cli kdeconnect-cli.cpp)
 ecm_mark_nongui_executable(kdeconnect-cli)
 
+target_include_directories(kdeconnect-cli PUBLIC ${CMAKE_BINARY_DIR})
+
 target_link_libraries(kdeconnect-cli
     kdeconnectinterfaces
     KF5::CoreAddons
@@ -10,3 +12,4 @@ target_link_libraries(kdeconnect-cli
 )
 
 install(TARGETS kdeconnect-cli ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(FILES kdeconnect.zsh RENAME _kdeconnect DESTINATION ${ZSH_AUTOCOMPLETE_DIR})

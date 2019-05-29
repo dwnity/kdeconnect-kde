@@ -32,7 +32,7 @@
 FileTransferJob::FileTransferJob(const QSharedPointer<QIODevice>& origin, qint64 size, const QUrl& destination)
     : KJob()
     , m_origin(origin)
-    , m_reply(Q_NULLPTR)
+    , m_reply(nullptr)
     , m_from(QStringLiteral("KDE Connect"))
     , m_destination(destination)
     , m_speedBytes(0)
@@ -82,6 +82,7 @@ void FileTransferJob::startTransfer()
         return;
 
     setProcessedAmount(Bytes, 0);
+    setTotalAmount(Files, 1);
     Q_EMIT description(this, i18n("Receiving file over KDE Connect"),
                         { i18nc("File transfer origin", "From"), m_from },
                         { i18nc("File transfer destination", "To"), m_destination.toLocalFile() });
@@ -125,18 +126,23 @@ void FileTransferJob::transferFinished()
     //TODO: MD5-check the file
     if (m_size == m_written) {
         qCDebug(KDECONNECT_CORE) << "Finished transfer" << m_destination;
-
+        setProcessedAmount(Files, 1);
         emitResult();
     } else {
         qCDebug(KDECONNECT_CORE) << "Received incomplete file ("<< m_written << "/" << m_size << "bytes ), deleting";
         
-        if (m_destination.isLocalFile() && QFile::exists(m_destination.toLocalFile())) {
-            QFile::remove(m_destination.toLocalFile());
-        }
-        
+        deleteDestinationFile();
+
         setError(3);
         setErrorText(i18n("Received incomplete file from: %1", m_from));
         emitResult();
+    }
+}
+
+void FileTransferJob::deleteDestinationFile()
+{
+    if (m_destination.isLocalFile() && QFile::exists(m_destination.toLocalFile())) {
+        QFile::remove(m_destination.toLocalFile());
     }
 }
 
@@ -148,5 +154,8 @@ bool FileTransferJob::doKill()
     if (m_origin) {
         m_origin->close();
     }
+
+    deleteDestinationFile();
+
     return true;
 }

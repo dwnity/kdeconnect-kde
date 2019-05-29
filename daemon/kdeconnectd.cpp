@@ -21,6 +21,11 @@
 #include <QApplication>
 #include <QNetworkAccessManager>
 #include <QTimer>
+#include <QLoggingCategory>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QDBusMessage>
+#include <QDBusConnection>
 
 #include <KAboutData>
 #include <KDBusService>
@@ -33,14 +38,17 @@
 #include "core/backends/pairinghandler.h"
 #include "kdeconnect-version.h"
 
+Q_DECLARE_LOGGING_CATEGORY(KDECONNECT_DAEMON)
+Q_LOGGING_CATEGORY(KDECONNECT_DAEMON, "kdeconnect.daemon")
+
 class DesktopDaemon : public Daemon
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.kdeconnect.daemon")
 public:
-    DesktopDaemon(QObject* parent = Q_NULLPTR)
+    DesktopDaemon(QObject* parent = nullptr)
         : Daemon(parent)
-        , m_nam(Q_NULLPTR)
+        , m_nam(nullptr)
     {}
 
     void askPairingConfirmation(Device* device) override
@@ -58,6 +66,7 @@ public:
 
     void reportError(const QString & title, const QString & description) override
     {
+        qCWarning(KDECONNECT_DAEMON) << title << ":" << description;
         KNotification::event(KNotification::Error, title, description);
     }
 
@@ -79,6 +88,9 @@ public:
         notification->sendEvent();
     }
 
+    void quit() override {
+        QApplication::quit();
+    }
 
 private:
     QNetworkAccessManager* m_nam;
@@ -88,7 +100,7 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
     KAboutData aboutData(
-        QStringLiteral("kdeconnectd"),
+        QStringLiteral("org.kde.kdeconnect.daemon"),
         i18n("KDE Connect Daemon"),
         QStringLiteral(KDECONNECT_VERSION_STRING),
         i18n("KDE Connect Daemon"),
@@ -97,10 +109,24 @@ int main(int argc, char* argv[])
     KAboutData::setApplicationData(aboutData);
     app.setQuitOnLastWindowClosed(false);
 
+    QCommandLineParser parser;
+    QCommandLineOption replaceOption({QStringLiteral("replace")}, i18n("Replace an existing instance"));
+    parser.addOption(replaceOption);
+    aboutData.setupCommandLine(&parser);
+
+    parser.process(app);
+    aboutData.processCommandLine(&parser);
+    if (parser.isSet(replaceOption)) {
+        auto message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kdeconnectd"),
+                                                    QStringLiteral("/MainApplication"),
+                                                    QStringLiteral("org.qtproject.Qt.QCoreApplication"),
+                                                    QStringLiteral("quit"));
+        QDBusConnection::sessionBus().call(message); //deliberately block until it's done, so we register the name after the app quits
+    }
+
     KDBusService dbusService(KDBusService::Unique);
 
-    Daemon* daemon = new DesktopDaemon;
-    QObject::connect(daemon, SIGNAL(destroyed(QObject*)), &app, SLOT(quit()));
+    DesktopDaemon daemon;
 
     return app.exec();
 }

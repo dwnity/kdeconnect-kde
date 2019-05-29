@@ -45,21 +45,21 @@
 #define MIN_VERSION_WITH_SSL_SUPPORT 6
 
 LanLinkProvider::LanLinkProvider(bool testMode)
-    : m_udpSocket(this)
+    : m_server(new Server(this))
+    , m_udpSocket(this)
+    , m_tcpPort(0)
     , m_testMode(testMode)
     , m_combineBroadcastsTimer(this)
 {
-    m_tcpPort = 0;
 
     m_combineBroadcastsTimer.setInterval(0); // increase this if waiting a single event-loop iteration is not enough
     m_combineBroadcastsTimer.setSingleShot(true);
     connect(&m_combineBroadcastsTimer, &QTimer::timeout, this, &LanLinkProvider::broadcastToNetwork);
 
-    connect(&m_udpSocket, &QIODevice::readyRead, this, &LanLinkProvider::newUdpConnection);
+    connect(&m_udpSocket, &QIODevice::readyRead, this, &LanLinkProvider::udpBroadcastReceived);
 
-    m_server = new Server(this);
     m_server->setProxy(QNetworkProxy::NoProxy);
-    connect(m_server,&QTcpServer::newConnection,this, &LanLinkProvider::newConnection);
+    connect(m_server, &QTcpServer::newConnection, this, &LanLinkProvider::newConnection);
 
     m_udpSocket.setProxy(QNetworkProxy::NoProxy);
 
@@ -88,7 +88,6 @@ void LanLinkProvider::onStart()
     bool success = m_udpSocket.bind(bindAddress, UDP_PORT, QUdpSocket::ShareAddress);
     Q_ASSERT(success);
 
-    qCDebug(KDECONNECT_CORE) << "onStart";
 
     m_tcpPort = MIN_TCP_PORT;
     while (!m_server->listen(bindAddress, m_tcpPort)) {
@@ -101,13 +100,14 @@ void LanLinkProvider::onStart()
     }
 
     onNetworkChange();
+    qCDebug(KDECONNECT_CORE) << "LanLinkProvider started";
 }
 
 void LanLinkProvider::onStop()
 {
-    qCDebug(KDECONNECT_CORE) << "onStop";
     m_udpSocket.close();
     m_server->close();
+    qCDebug(KDECONNECT_CORE) << "LanLinkProvider stopped";
 }
 
 void LanLinkProvider::onNetworkChange()
@@ -164,8 +164,8 @@ void LanLinkProvider::broadcastToNetwork()
 }
 
 //I'm the existing device, a new device is kindly introducing itself.
-//I will create a TcpSocket and try to connect. This can result in either connected() or connectError().
-void LanLinkProvider::newUdpConnection() //udpBroadcastReceived
+//I will create a TcpSocket and try to connect. This can result in either tcpSocketConnected() or connectError().
+void LanLinkProvider::udpBroadcastReceived()
 {
     while (m_udpSocket.hasPendingDatagrams()) {
 
@@ -185,7 +185,14 @@ void LanLinkProvider::newUdpConnection() //udpBroadcastReceived
 
         //qCDebug(KDECONNECT_CORE) << "Datagram " << datagram.data() ;
 
-        if (!success || receivedPacket->type() != PACKET_TYPE_IDENTITY) {
+        if (!success) {
+            qCDebug(KDECONNECT_CORE) << "Could not unserialize UDP packet";
+            delete receivedPacket;
+            continue;
+        }
+
+        if (receivedPacket->type() != PACKET_TYPE_IDENTITY) {
+            qCDebug(KDECONNECT_CORE) << "Received a UDP packet of wrong type" << receivedPacket->type();
             delete receivedPacket;
             continue;
         }
@@ -204,19 +211,18 @@ void LanLinkProvider::newUdpConnection() //udpBroadcastReceived
         socket->setProxy(QNetworkProxy::NoProxy);
         m_receivedIdentityPackets[socket].np = receivedPacket;
         m_receivedIdentityPackets[socket].sender = sender;
-        connect(socket, &QAbstractSocket::connected, this, &LanLinkProvider::connected);
-        connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(connectError()));
+        connect(socket, &QAbstractSocket::connected, this, &LanLinkProvider::tcpSocketConnected);
+        connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &LanLinkProvider::connectError);
         socket->connectToHost(sender, tcpPort);
     }
 }
 
-void LanLinkProvider::connectError()
+void LanLinkProvider::connectError(QAbstractSocket::SocketError socketError)
 {
     QSslSocket* socket = qobject_cast<QSslSocket*>(sender());
     if (!socket) return;
-    disconnect(socket, &QAbstractSocket::connected, this, &LanLinkProvider::connected);
-    disconnect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(connectError()));
 
+    qCDebug(KDECONNECT_CORE) << "Socket error" << socketError;
     qCDebug(KDECONNECT_CORE) << "Fallback (1), try reverse connection (send udp packet)" << socket->errorString();
     NetworkPacket np(QLatin1String(""));
     NetworkPacket::createIdentityPacket(&np);
@@ -230,13 +236,13 @@ void LanLinkProvider::connectError()
 }
 
 //We received a UDP packet and answered by connecting to them by TCP. This gets called on a successful connection.
-void LanLinkProvider::connected()
+void LanLinkProvider::tcpSocketConnected()
 {
     QSslSocket* socket = qobject_cast<QSslSocket*>(sender());
 
     if (!socket) return;
-    disconnect(socket, &QAbstractSocket::connected, this, &LanLinkProvider::connected);
-    disconnect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(connectError()));
+    // TODO Delete me?
+    disconnect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &LanLinkProvider::connectError);
 
     configureSocket(socket);
 
@@ -245,7 +251,7 @@ void LanLinkProvider::connected()
 
     NetworkPacket* receivedPacket = m_receivedIdentityPackets[socket].np;
     const QString& deviceId = receivedPacket->get<QString>(QStringLiteral("deviceId"));
-    //qCDebug(KDECONNECT_CORE) << "Connected" << socket->isWritable();
+    //qCDebug(KDECONNECT_CORE) << "tcpSocketConnected" << socket->isWritable();
 
     // If network is on ssl, do not believe when they are connected, believe when handshake is completed
     NetworkPacket np2(QLatin1String(""));
@@ -268,7 +274,7 @@ void LanLinkProvider::connected()
             connect(socket, &QSslSocket::encrypted, this, &LanLinkProvider::encrypted);
 
             if (isDeviceTrusted) {
-                connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslErrors(QList<QSslError>)));
+                connect(socket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this, &LanLinkProvider::sslErrors);
             }
 
             socket->startServerEncryption();
@@ -296,8 +302,8 @@ void LanLinkProvider::encrypted()
 
     QSslSocket* socket = qobject_cast<QSslSocket*>(sender());
     if (!socket) return;
-    disconnect(socket, &QSslSocket::encrypted, this, &LanLinkProvider::encrypted);
-    disconnect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslErrors(QList<QSslError>)));
+    // TODO delete me?
+    disconnect(socket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this, &LanLinkProvider::sslErrors);
 
     Q_ASSERT(socket->mode() != QSslSocket::UnencryptedMode);
     LanDeviceLink::ConnectionStarted connectionOrigin = (socket->mode() == QSslSocket::SslClientMode)? LanDeviceLink::Locally : LanDeviceLink::Remotely;
@@ -307,7 +313,7 @@ void LanLinkProvider::encrypted()
 
     addLink(deviceId, socket, receivedPacket, connectionOrigin);
 
-    // Copied from connected slot, now delete received packet
+    // Copied from tcpSocketConnected slot, now delete received packet
     delete m_receivedIdentityPackets.take(socket).np;
 }
 
@@ -315,9 +321,6 @@ void LanLinkProvider::sslErrors(const QList<QSslError>& errors)
 {
     QSslSocket* socket = qobject_cast<QSslSocket*>(sender());
     if (!socket) return;
-
-    disconnect(socket, &QSslSocket::encrypted, this, &LanLinkProvider::encrypted);
-    disconnect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslErrors(QList<QSslError>)));
 
     qCDebug(KDECONNECT_CORE) << "Failing due to " << errors;
     Device* device = Daemon::instance()->getDevice(socket->peerVerifyName());
@@ -374,7 +377,7 @@ void LanLinkProvider::dataReceived()
         return;
     }
 
-    // Needed in "encrypted" if ssl is used, similar to "connected"
+    // Needed in "encrypted" if ssl is used, similar to "tcpSocketConnected"
     m_receivedIdentityPackets[socket].np = np;
 
     const QString& deviceId = np->get<QString>(QStringLiteral("deviceId"));
@@ -393,7 +396,7 @@ void LanLinkProvider::dataReceived()
         connect(socket, &QSslSocket::encrypted, this, &LanLinkProvider::encrypted);
 
         if (isDeviceTrusted) {
-            connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslErrors(QList<QSslError>)));
+            connect(socket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this, &LanLinkProvider::sslErrors);
         }
 
         socket->startClientEncryption();

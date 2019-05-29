@@ -54,6 +54,15 @@ Notification::Notification(const NetworkPacket& np, QObject* parent)
 
     parseNetworkPacket(np);
     createKNotification(np);
+
+    connect(m_notification, QOverload<unsigned int>::of(&KNotification::activated), this, [this] (unsigned int actionIndex) {
+        // Do nothing for our own reply action
+        if(!m_requestReplyId.isEmpty() && actionIndex == 1) {
+            return;
+        }
+        // Notification action idices start at 1
+        Q_EMIT actionTriggered(m_internalId, m_actions[actionIndex - 1]);
+    });
 }
 
 Notification::~Notification()
@@ -97,24 +106,15 @@ void Notification::createKNotification(const NetworkPacket& np)
 
     if (m_title.isEmpty() && m_text.isEmpty()) {
        m_notification->setText(escapedTicker);
-    } else if (m_appName==m_title) {
+    } else if (m_appName == m_title) {
         m_notification->setText(escapedText);
-    } else if (m_title.isEmpty()){
+    } else if (m_title.isEmpty()) {
          m_notification->setText(escapedText);
-    } else if (m_text.isEmpty()){
+    } else if (m_text.isEmpty()) {
          m_notification->setText(escapedTitle);
     } else {
-        m_notification->setText(escapedTitle+": "+escapedText);
+        m_notification->setText(escapedTitle + ": " + escapedText);
     }
-
-    connect(m_notification, QOverload<unsigned int>::of(&KNotification::activated), this, [this] (unsigned int actionIndex) {
-        // Do nothing for our own reply action
-        if(!m_requestReplyId.isEmpty() && actionIndex == 1) {
-            return;
-        }
-        // Notification action idices start at 1
-        Q_EMIT actionTriggered(m_internalId, m_actions[actionIndex - 1]);
-    });
 
     m_hasIcon = m_hasIcon && !m_payloadHash.isEmpty();
 
@@ -128,7 +128,7 @@ void Notification::createKNotification(const NetworkPacket& np)
 
     if (!m_requestReplyId.isEmpty()) {
         m_actions.prepend(i18n("Reply"));
-        connect(m_notification, &KNotification::action1Activated, this, &Notification::reply);
+        connect(m_notification, &KNotification::action1Activated, this, &Notification::reply, Qt::UniqueConnection);
     }
 
     m_notification->setActions(m_actions);

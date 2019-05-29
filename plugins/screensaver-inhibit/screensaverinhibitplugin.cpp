@@ -20,11 +20,9 @@
 
 #include "screensaverinhibitplugin.h"
 
-#include <QDebug>
 #include <KLocalizedString>
 #include <KPluginFactory>
 #include <QLoggingCategory>
-#include <core/device.h>
 #include <QDBusConnection>
 #include <QDBusInterface>
 
@@ -32,19 +30,19 @@ K_PLUGIN_FACTORY_WITH_JSON( KdeConnectPluginFactory, "kdeconnect_screensaver_inh
 
 Q_LOGGING_CATEGORY(KDECONNECT_PLUGIN_SCREENSAVERINHIBIT, "kdeconnect.plugin.screensaverinhibit")
 
-const QString INHIBIT_SERVICE = QStringLiteral("org.freedesktop.ScreenSaver");
-const QString INHIBIT_INTERFACE = INHIBIT_SERVICE;
-const QString INHIBIT_PATH = QStringLiteral("/ScreenSaver");
-const QString INHIBIT_METHOD = QStringLiteral("Inhibit");
-const QString UNINHIBIT_METHOD = QStringLiteral("UnInhibit");
-const QString SIMULATE_ACTIVITY_METHOD = QStringLiteral("SimulateUserActivity");
+#define INHIBIT_SERVICE QStringLiteral("org.freedesktop.ScreenSaver")
+#define INHIBIT_INTERFACE INHIBIT_SERVICE
+#define INHIBIT_PATH QStringLiteral("/ScreenSaver")
+#define INHIBIT_METHOD QStringLiteral("Inhibit")
+#define UNINHIBIT_METHOD QStringLiteral("UnInhibit")
+#define SIMULATE_ACTIVITY_METHOD QStringLiteral("SimulateUserActivity")
 
 ScreensaverInhibitPlugin::ScreensaverInhibitPlugin(QObject* parent, const QVariantList& args)
     : KdeConnectPlugin(parent, args)
 {
     QDBusInterface inhibitInterface(INHIBIT_SERVICE, INHIBIT_PATH, INHIBIT_INTERFACE);
 
-    QDBusMessage reply = inhibitInterface.call(INHIBIT_METHOD, "kdeconnect", "Phone is connected");
+    QDBusMessage reply = inhibitInterface.call(INHIBIT_METHOD, QStringLiteral("org.kde.kdeconnect.daemon"), i18n("Phone is connected"));
 
     if (reply.errorMessage() != nullptr) {
         qCDebug(KDECONNECT_PLUGIN_SCREENSAVERINHIBIT) << "Unable to inhibit the screensaver: " << reply.errorMessage();
@@ -73,7 +71,6 @@ ScreensaverInhibitPlugin::~ScreensaverInhibitPlugin()
 
 void ScreensaverInhibitPlugin::connected()
 {
-
 }
 
 bool ScreensaverInhibitPlugin::receivePacket(const NetworkPacket& np)
@@ -81,6 +78,5 @@ bool ScreensaverInhibitPlugin::receivePacket(const NetworkPacket& np)
     Q_UNUSED(np);
     return false;
 }
-
 
 #include "screensaverinhibitplugin.moc"

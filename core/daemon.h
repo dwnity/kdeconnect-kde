@@ -51,6 +51,7 @@ public:
 
     virtual void askPairingConfirmation(Device* device) = 0;
     virtual void reportError(const QString& title, const QString& description) = 0;
+    virtual void quit() = 0;
     virtual QNetworkAccessManager* networkAccessManager();
 
     Device* getDevice(const QString& deviceId);
@@ -88,6 +89,9 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onNewDeviceLink(const NetworkPacket& identityPacket, DeviceLink* dl);
     void onDeviceStatusChanged();
+
+private:
+    void init();
 
 protected:
     void addDevice(Device* device);

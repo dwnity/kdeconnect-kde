@@ -20,16 +20,19 @@
 
 #include "findthisdeviceplugin.h"
 
-// Phonon
-#include <phonon/mediaobject.h>
 // KF
 #include <KPluginFactory>
+
+#ifndef Q_OS_WIN
+#include <PulseAudioQt/Context>
+#include <PulseAudioQt/Sink>
+#endif
 // Qt
 #include <QDBusConnection>
 #include <QStandardPaths>
 #include <QFile>
 #include <QUrl>
-
+#include <QMediaPlayer>
 
 K_PLUGIN_FACTORY_WITH_JSON(KdeConnectPluginFactory, "kdeconnect_findthisdevice.json",
                            registerPlugin<FindThisDevicePlugin>();)
@@ -88,11 +91,31 @@ bool FindThisDevicePlugin::receivePacket(const NetworkPacket& np)
         return true;
     }
 
-    Phonon::MediaObject *media = Phonon::createPlayer(Phonon::NotificationCategory, soundURL);  // or CommunicationCategory?
-    media->play();
-    connect(media, &Phonon::MediaObject::finished, media, &QObject::deleteLater);
+    QMediaPlayer* player = new QMediaPlayer;
+    player->setAudioRole(QAudio::Role(QAudio::NotificationRole));
+    player->setMedia(soundURL);
+    player->setVolume(100);
+    player->play();
 
-    // TODO: by-pass volume settings in case it is muted
+#ifndef Q_OS_WIN
+    const auto sinks = PulseAudioQt::Context::instance()->sinks();
+    QVector<PulseAudioQt::Sink*> mutedSinks;
+
+    for (auto sink : sinks) {
+        if (sink->isMuted()) {
+            sink->setMuted(false);
+            mutedSinks.append(sink);
+        }
+    }
+
+    connect(player, &QMediaPlayer::stateChanged, this, [player, mutedSinks]{
+        player->deleteLater();
+        for (auto sink : qAsConst(mutedSinks)) {
+            sink->setMuted(true);
+        }
+    });
+#endif
+
     // TODO: ensure to use built-in loudspeakers
 
     return true;

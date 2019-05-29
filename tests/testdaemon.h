@@ -27,9 +27,9 @@
 class TestDaemon : public Daemon
 {
 public:
-    TestDaemon(QObject* parent = Q_NULLPTR)
+    TestDaemon(QObject* parent = nullptr)
         : Daemon(parent, true)
-        , m_nam(Q_NULLPTR)
+        , m_nam(nullptr)
     {
     }
 
@@ -57,6 +57,10 @@ public:
     Q_SCRIPTABLE virtual void sendSimpleNotification(const QString &eventId, const QString &title, const QString &text, const QString &iconName) override
     {
         qDebug() << eventId << title << text << iconName;
+    }
+
+    void quit() override {
+        qDebug() << "quit was called";
     }
 
 private:

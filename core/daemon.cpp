@@ -54,6 +54,7 @@ struct DaemonPrivate
     QMap<QString, Device*> m_devices;
 
     QSet<QString> m_discoveryModeAcquisitions;
+    bool m_testMode;
 };
 
 Daemon* Daemon::instance()
@@ -68,10 +69,18 @@ Daemon::Daemon(QObject* parent, bool testMode)
 {
     Q_ASSERT(!s_instance);
     s_instance = this;
-    qCDebug(KDECONNECT_CORE) << "KdeConnect daemon starting";
+    d->m_testMode = testMode;
+
+    // HACK init may call pure virtual functions from this class so it can't be called directly from the ctor
+    QTimer::singleShot(0, this, &Daemon::init);
+}
+
+void Daemon::init()
+{
+    qCDebug(KDECONNECT_CORE) << "Daemon starting";
 
     //Load backends
-    if (testMode)
+    if (d->m_testMode)
         d->m_linkProviders.insert(new LoopbackLinkProvider());
     else {
         d->m_linkProviders.insert(new LanLinkProvider());
@@ -101,7 +110,7 @@ Daemon::Daemon(QObject* parent, bool testMode)
     QDBusConnection::sessionBus().registerService(QStringLiteral("org.kde.kdeconnect"));
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/modules/kdeconnect"), this, QDBusConnection::ExportScriptableContents);
 
-    qCDebug(KDECONNECT_CORE) << "KdeConnect daemon started";
+    qCDebug(KDECONNECT_CORE) << "Daemon started";
 }
 
 void Daemon::acquireDiscoveryMode(const QString& key)
@@ -136,7 +145,8 @@ void Daemon::removeDevice(Device* device)
 
 void Daemon::cleanDevices()
 {
-    for (Device* device : qAsConst(d->m_devices)) {
+    const auto devs = d->m_devices;
+    for (Device* device : devs) {
         if (device->isTrusted()) {
             continue;
         }
@@ -150,7 +160,7 @@ void Daemon::cleanDevices()
 
 void Daemon::forceOnNetworkChange()
 {
-    qCDebug(KDECONNECT_CORE) << "Sending onNetworkChange to " << d->m_linkProviders.size() << " LinkProviders";
+    qCDebug(KDECONNECT_CORE) << "Sending onNetworkChange to" << d->m_linkProviders.size() << "LinkProviders";
     for (LinkProvider* a : qAsConst(d->m_linkProviders)) {
         a->onNetworkChange();
     }
@@ -163,7 +173,7 @@ Device*Daemon::getDevice(const QString& deviceId)
             return device;
         }
     }
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 QStringList Daemon::devices(bool onlyReachable, bool onlyTrusted) const
