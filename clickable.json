@@ -1,0 +1,11 @@
+{
+  "template": "cmake",
+  "kill": "qmlscene",
+  "dependencies": [
+    "extra-cmake-modules:armhf", 
+    "qt5-qmake:armhf",
+    "qtbase5-dev:armhf",
+    "libjs-underscore:armhf"
+  ]
+}
+
