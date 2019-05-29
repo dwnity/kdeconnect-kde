@@ -1,7 +1,7 @@
 stages:
     - build
 
-ut-tweak-tool_xenial_click:
+kdeconnect_xenial_click:
     stage: build  
     image: clickable/ci-16.04-armhf
     script:
