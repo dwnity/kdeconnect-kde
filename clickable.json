@@ -1,11 +1,15 @@
 {
   "template": "cmake",
   "kill": "qmlscene",
-  "dependencies": [
-    "extra-cmake-modules:armhf", 
+  "dependencies_build": [
+    "extra-cmake-modules:all", 
     "qt5-qmake:armhf",
     "qtbase5-dev:armhf",
-    "libjs-underscore:armhf"
+    "libjs-underscore:all",
+    "libqca-qt5-2-dev:all",
+    "libqca-qt5-2 :all",
+    "qtbase5-dev:all",
+    "libqca2-doc:all"
   ]
 }
 
