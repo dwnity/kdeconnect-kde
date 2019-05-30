@@ -5,7 +5,10 @@
     "extra-cmake-modules:all", 
     "qt5-qmake:armhf",
     "qtbase5-dev:armhf",
-    "libjs-underscore:all"
+    "libjs-underscore:all",
+    "libqca-qt5-2-dev:armhf",
+    "libqca-qt5-2:armhf",
+    "qtbase5-dev:armhf"
   ]
 }
 
