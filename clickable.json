@@ -9,6 +9,9 @@
     "libqca-qt5-2-dev:armhf",
     "libqca-qt5-2:armhf",
     "qtbase5-dev:armhf"
-  ]
+  ],
+  "dependencies_ppa": [
+    "ppa:rikmills/experimental"
+    ]
 }
 
