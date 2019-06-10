@@ -7,6 +7,9 @@ include:
 stages:
     - build
 
+before_script:
+  - git clone --depth=1 https://cgit.kde.org/pulseaudio-qt.git/
+
 kdeconnect-kde_xenial_click:
     stage: build  
     image: clickable/ci-16.04-armhf
