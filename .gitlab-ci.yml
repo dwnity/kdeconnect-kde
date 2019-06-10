@@ -20,9 +20,11 @@ pulseaudio-qt:
         key: deps-cache
         paths:
             - build/pulseaudio-qt
+            - pulseaudio-qt
     artifacts:
         paths:
             - build/pulseaudio-qt
+            - pulseaudio-qt
         expire_in: 1 week
 
 kdeconnect-kde_xenial_click:
