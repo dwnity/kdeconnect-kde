@@ -8,7 +8,7 @@ stages:
     - build
 
 before_script:
-  - git clone --depth=1 https://cgit.kde.org/pulseaudio-qt.git/
+  - git clone --depth=1 https://cgit.kde.org/pulseaudio-qt.git
 
 kdeconnect-kde_xenial_click:
     stage: build  
