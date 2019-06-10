@@ -7,8 +7,8 @@ include:
 stages:
     - build
 
-before_script:
-  - git clone https://cgit.kde.org/pulseaudio-qt.git /build/ci-tooling
+#before_script:
+#  - git clone https://cgit.kde.org/pulseaudio-qt.git /build/ci-tooling
 
 kdeconnect-kde_xenial_click:
     stage: build  
