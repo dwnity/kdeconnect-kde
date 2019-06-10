@@ -5,10 +5,25 @@ include:
   - https://invent.kde.org/sysadmin/ci-tooling/raw/master/invent/ci-extragear-windows.yml
 
 stages:
+    - deps
     - build
 
 before_script:
   - git clone https://anongit.kde.org/pulseaudio-qt.git
+
+tdlib:
+    stage: deps
+    image: clickable/ci-16.04-armhf
+    script:
+        - clickable build-libs pulseaudio-qt --arch armhf
+    cache:
+        key: deps-cache
+        paths:
+            - build/pulseaudio-qt
+    artifacts:
+        paths:
+            - build/pulseaudio-qt
+        expire_in: 1 week
 
 kdeconnect-kde_xenial_click:
     stage: build  
