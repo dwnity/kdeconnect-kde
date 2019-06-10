@@ -11,7 +11,7 @@ stages:
 before_script:
   - git clone https://anongit.kde.org/pulseaudio-qt.git
 
-tdlib:
+pulseaudio-qt:
     stage: deps
     image: clickable/ci-16.04-armhf
     script:
